@@ -1,2 +1,3 @@
 # SAS
-SAS Template
+
+This repository is used as my SAS coding templates. 
