@@ -1,1 +1,101 @@
 *This file is SAS data step cheatsheet;
+*CAS, Cloud Analytic Service is a SAS cloud remote service. Most SAS data step statement also fit in CAS; 
+
+libname libref "file_path";
+
+/*
+Automatic Data Step Variable
+SAS dataset has these veriabls in the data step: 
+_N_
+*/
+
+/*
+Dataset Options:
+1  rename variables
+2  select only the first or last n observations for processing
+3  drop variables from processing or from the output dataset
+4  specify a password for a dataset
+
+Most SAS data set options apply to either input or output SAS data sets in DATA steps or procedure (PROC) steps. 
+If a data set option is associated with an input data set, the action applies to the data set that is being read. 
+If the data set option appears in the DATA statement or after an output data set specification in a PROC step, SAS applies the action to the output data set. 
+
+When data set options appear in input and output data sets in the same DATA or PROC step, 
+SAS first applies data set options to input data sets. 
+Then SAS evaluates programming statements or applies data set options to output data sets.
+
+Timing can also be an issue in some cases. 
+For example, if you are using KEEP= and RENAME= on a data set that is specified in the SET statement, 
+KEEP= needs to use the original variable names. SAS processes KEEP= before the data set is read. 
+The new names that are specified in RENAME= apply to the programming statements that follow the SET statement.
+
+Many system options and data set options share the same name and have the same function. 
+System options remain in effect for all DATA steps and PROC steps in a SAS job or session.
+The data set option overrides the system option for the data set in the step in which it appears.
+  eg:
+  options obs=100; system options    
+  data final;
+     set two(obs=5) three;  dataset options
+  run;
+
+Syntax DATA libref.dataset(OPTIONS);  eg: DATA old(rename=(date=Start_Date));
+
+Data Set Control	
+ALTER= password	                                      - Assigns an ALTER= password to a SAS file that prevents users from replacing or deleting the file, and enables access to a read- and write-protected file.
+COMPRESS= NO | YES | CHAR | BINARY                    - Specifies how observations are compressed in a new output SAS data set. In general, COMPRESS=CHAR provides good compression when single bytes repeat, eg:"aaaaaa"; COMPRESS=BINARY provides good compression when strings of bytes repeat, eg:"abcabc".
+DLDMGACTION= FAIL | ABORT | REPAIR | NOINDEX | PROMPT - Specifies the action to take when a SAS data set in a SAS library is detected as damaged. 
+                                                        FAIL:stops the step and issues an error message to the log immediately. This is the default for batch mode.
+                                                        ABORT:stops the step, issues an error message to the log, and terminates the SAS session.
+                                                        REPAIR:attempts to automatically repair a damaged data set on the next attempt to open the damaged file. The data set might truncate at the point of damage. The REPAIR option re-creates the index or indexes. If the damage is too severe, the auto repair attempt might not be successful.
+                                                        NOINDEX:automatically repairs the data file without the indexes and integrity constraints. 
+                                                        PROMPT:displays a dialog box that asks you to select the FAIL, ABORT, REPAIR, or NOINDEX action.
+ENCRYPT= AES | AES2 | NO | YES                        - No by default. Specifies whether to encrypt an output SAS data set.
+                                                        AES | AES2: encryption methodology. must use encryptkey=password to assign password
+                                                        YES: must use read=password to assign password
+ENCRYPTKEY= password                                  - Specifies a key value for AES (Advanced Encryption Standard) encryption.
+                                                        1 to 64 bytes; not supported in a DATA step that runs in CAS; Use only with SAS 9.4 or later; Use only with AES-encrypted data files.
+READ= password                                        - Assigns a READ= password to a SAS file that prevents users from reading the file, unless they enter the password.
+                                                        not supported in a DATA step that runs in CAS.
+INDEX= (variable(s) </UNIQUE> </NOMISS> )             - Defines an index for a new output SAS data set.
+                                                        data new(index=(ssn));
+                                                        data new(index=(cityst=(city state)));
+                                                        data new(index=(ssn /unique));
+                                                        data new(index=(ssn /nomiss));
+                                                        data new(index=(ssn /unique/nomiss cityst=(city state) /unique/nomiss));
+LABEL= 'label'                                        - Specifies a label for a SAS data set.
+                                                        a text string of up to 256 bytes. 
+                                                        If the label text contains single quotation marks, enclose the label in double quotation marks. 
+                                                        To remove a label from a data set, assign a blank space that is enclosed in quotation marks to the label.
+                                                        You can also use two single quotation marks in the label text and enclose the string in single quotation marks.
+PW= password                                          - Assigns a READ, WRITE, and ALTER password to a SAS file, and enables access to a password-protected SAS file.
+                                                        password must be a valid SAS name, which limits the password to eight characters and is case-insensitive.
+REPEMPTY= YES | NO                                    - Specifies whether a new, empty data set can overwrite an existing SAS data set.
+                                                        By default is YES. Suggest to set it NO
+REPLACE= NO | YES                                     - Specifies whether a new SAS data set that contains data can overwrite an existing data set.
+                                                        Use REPLACE=YES and REPEMPTY=NO for the convenience of replacing existing data sets with new ones that contain data.
+SORTEDBY= by-clause</ collate-name> | _NULL_          - Specifies how a data set is currently sorted. No need to sort the dataset again 
+                                                        by-clause: names the variables and options that you use in a BY statement in a PROC SORT step.
+                                                        collate-name: names the collating sequence that is used for the sort. By default, the collating sequence is that of your operating environment. A slash (/) must precede the collating sequence. 
+                                                        _NULL_: removes any existing sort indicator.
+TYPE= data-set-type                                   - Specifies the data set type for a specially structured SAS data set.
+                                                        You can use the CONTENTS procedure to determine the type of data set.
+                                                        Most SAS data sets do not have a specified type. 
+                                                        However, there are several specially structured SAS data sets that are used by some SAS/STAT procedures. 
+                                                        Some of the special data sets are CORR, COV, SSPC, EST, and FACTOR.
+WRITE= write-password                                 - Assigns a WRITE= password to a SAS file that prevents users from writing to a file, unless the users enter the password.
+                                                        must be a valid SAS name.
+Observation Control	
+FIRSTOBS= Data Set Option	Specifies the first observation that SAS processes in a SAS data set.
+IN= Data Set Option	Creates a Boolean variable that indicates whether the data set contributed data to the current observation.
+OBS= Data Set Option	Specifies the last observation that SAS processes in a data set.
+POINTOBS= Data Set Option	Specifies whether SAS creates compressed data sets whose observations can be randomly accessed or sequentially accessed.
+WHERE= Data Set Option	Specifies specific conditions to use to select observations from a SAS data set.
+WHEREUP= Data Set Option	Specifies whether to evaluate new observations and modified observations against a WHERE expression.
+User Control of SAS Index Usage	
+IDXNAME= Data Set Option	Directs SAS to use a specific index to match the conditions of a WHERE expression.
+IDXWHERE= Data Set Option	Specifies whether SAS uses an index search or a sequential search to match the conditions of a WHERE expression.
+Variable Control	
+DROP= Data Set Option	For an input data set, excludes the specified variables from processing; for an output data set, excludes the specified variables from being written to the data set.
+KEEP= Data Set Option	For an input data set, specifies the variables to process; for an output data set, specifies the variables to write to the data set.
+RENAME= Data Set Option	Changes the name of a variable.
+*/
