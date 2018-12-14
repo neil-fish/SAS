@@ -2,6 +2,12 @@
 *CAS, Cloud Analytic Service is a SAS cloud remote service. Most SAS data step statement also fit in CAS; 
 
 libname libref "file_path";
+/*Most Common Structure
+DATA work.input(......); 
+SET libref.datset(KEEP=A RENAME=(A=B) WHERE=(B=1) REPLACE= YES FIRSTOBS=2 OBS=10 IN=indicator);
+RUN;
+*/
+
 
 /*
 Automatic Data Step Variable
@@ -85,17 +91,28 @@ TYPE= data-set-type                                   - Specifies the data set t
 WRITE= write-password                                 - Assigns a WRITE= password to a SAS file that prevents users from writing to a file, unless the users enter the password.
                                                         must be a valid SAS name.
 Observation Control	
-FIRSTOBS= Data Set Option	Specifies the first observation that SAS processes in a SAS data set.
-IN= Data Set Option	Creates a Boolean variable that indicates whether the data set contributed data to the current observation.
-OBS= Data Set Option	Specifies the last observation that SAS processes in a data set.
-POINTOBS= Data Set Option	Specifies whether SAS creates compressed data sets whose observations can be randomly accessed or sequentially accessed.
-WHERE= Data Set Option	Specifies specific conditions to use to select observations from a SAS data set.
-WHEREUP= Data Set Option	Specifies whether to evaluate new observations and modified observations against a WHERE expression.
-User Control of SAS Index Usage	
-IDXNAME= Data Set Option	Directs SAS to use a specific index to match the conditions of a WHERE expression.
-IDXWHERE= Data Set Option	Specifies whether SAS uses an index search or a sequential search to match the conditions of a WHERE expression.
+FIRSTOBS= n | nK | nM | nG | hexX | MIN | MAX         - Specifies the first observation that SAS processes in a SAS data set.
+                                                        n | nK | nM | nG: 8 specifies the eighth observation, and a value of 3k specifies 3,072.
+                                                        hexX: 2dx sets the 45th observation as the first observation to process.
+                                                        MIN: sets the number of the first observation to process to 1. This is the default.
+                                                        MAX: sets the number of the first observation to process to the maximum number of observations in the data set. This number can be up to the largest eight-byte, signed integer, which is 263–1, or approximately 9.2 quintillion observations.
+IN= variable                                          - Creates a Boolean variable that indicates whether the data set contributed data to the current observation.
+                                                        variable names the new variable whose value indicates whether the input data set contributed data to the current observation. Within the DATA step, the value of the variable is 1 if the data set contributed to the current observation. Otherwise, the value is 0.
+OBS= n | nK | nM | nG | nT | hexX | MIN | MAX         - Specifies the last observation that SAS processes in a data set.
+POINTOBS= YES | NO                                    - Specifies whether SAS creates compressed data sets whose observations can be randomly accessed or sequentially accessed.
+                                                        YES: need to access data by observation number in a compressed data set. It does increase CPU usage by approximately 10%
+                                                        NO: do not need to access data by observation number in a compressed data set
+                                                        Because POINTOBS=YES is the default when you use compression, REUSE=YES causes POINTOBS= to change to NO
+WHERE= (where-expression-1 <logical-operator where-expression-2> )
+                                                      - Specifies specific conditions to use to select observations from a SAS data set.
+                                                        where-expression is an arithmetic or logical expression that consists of a sequence of operators, operands, and SAS functions. 
+                                                        logical-operator can be AND, AND NOT, OR, or OR NOT.
+                                                        The expression must be enclosed in parentheses.
 Variable Control	
-DROP= Data Set Option	For an input data set, excludes the specified variables from processing; for an output data set, excludes the specified variables from being written to the data set.
-KEEP= Data Set Option	For an input data set, specifies the variables to process; for an output data set, specifies the variables to write to the data set.
-RENAME= Data Set Option	Changes the name of a variable.
+DROP= variable(s)                                     - For an input data set, excludes the specified variables from processing; for an output data set, excludes the specified variables from being written to the data set.
+KEEP= variable(s)                                     - For an input data set, specifies the variables to process; for an output data set, specifies the variables to write to the data set.
+RENAME= (old-variable-name-1=new-variable-name-1 <old-variable-name-2=new-variable-name-2 ...> )
+                                                      - Changes the name of a variable.
+                                                        If you use RENAME= with WHERE processing such as a WHERE statement or a WHERE= data set option, the new name is applied before the data is processed. You must use the new name in the WHERE expression.
+                                                        The DROP= and KEEP= data set options are applied before RENAME=. You must use the old name in the DROP= and KEEP= data set options. 
 */
