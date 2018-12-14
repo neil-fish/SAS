@@ -5,6 +5,9 @@ libname libref "file_path";
 /*Most Common Structure
 DATA work.input(......); 
 SET libref.datset(KEEP=A RENAME=(A=B) WHERE=(B=1) REPLACE= YES FIRSTOBS=2 OBS=10 IN=indicator);
+FORMAT B 10.2;
+FORMAT C $6.;
+FORMAT DATE date9.;
 RUN;
 */
 
@@ -115,4 +118,86 @@ RENAME= (old-variable-name-1=new-variable-name-1 <old-variable-name-2=new-variab
                                                       - Changes the name of a variable.
                                                         If you use RENAME= with WHERE processing such as a WHERE statement or a WHERE= data set option, the new name is applied before the data is processed. You must use the new name in the WHERE expression.
                                                         The DROP= and KEEP= data set options are applied before RENAME=. You must use the old name in the DROP= and KEEP= data set options. 
+*/
+
+/*Format
+A format is a type of SAS language element that applies a pattern to or executes instructions for a data value to be displayed or written as output. 
+Types of formats correspond to the type of data: numeric, character, date, time, or timestamp. 
+The ability to create user-defined formats is also supported. 
+Examples of SAS formats are BINARY, DATE, and WORDS. For example, the WORDS22. format, which converts numeric values to their equivalent in words, writes the numeric value 692 as six hundred ninety-two.
+
+Syntax:
+<$>format<w>.<d>                                      - $: indicates a character format. Its absence indicates a numeric format.
+                                                      - format: names the format. The format is a SAS format or a user-defined format that was previously defined with the VALUE statement in PROC FORMAT.
+                                                      - w: pecifies the format width, which for most formats is the number of columns in the output data.
+                                                      - d: specifies an optional decimal scaling factor in the numeric formats.
+eg:
+DOLLAR10.2
+the w value of 10 specifies a maximum of 10 columns for the value. 
+The d value of 2 specifies that two of these columns are for the decimal part of the value, which leaves eight columns for the remaining characters in the value. 
+The remaining columns include the decimal point, the remaining numeric value, a minus sign if the value is negative, the dollar sign, and commas, if any.
+
+Attention Point:
+If the format width is too narrow to represent a value, SAS tries to squeeze the value into the space available. 
+Character formats truncate values on the right. Numeric formats sometimes revert to the BESTw.d format. 
+SAS prints asterisks if you do not specify an adequate width. In the following example, the result is x=**.
+If you use an incompatible format, such as a numeric format to write character values, SAS first attempts to use an analogous format of the other type. 
+If this attempt fails, an error message that describes the problem is displayed in the SAS log.
+When the value of d is greater than 15, the precision of the decimal value after the 15th significant digit might not be accurate.
+
+You can use formats in these ways:
+in a PUT statement                                    - The PUT statement with a format after the variable name uses a format to write data values in a DATA step. PUT statement writes a value to an external destination (either the SAS log or a destination, that you specify).
+                                                        amount=1145.32;
+                                                        put amount dollar10.2;
+with the PUT, PUTC, or PUTN functions                 - The PUT function converts a numeric variable, a character variable, or a constant by using any valid format and then returns the resulting character value. PUT works in compile step while PUTC and PUTN work in run time.
+                                                        num=15;
+                                                        char=put(num,hex2.); *char has a character value;
+with the %SYSFUNC macro function                      - The %SYSFUNC (or %QSYSFUNC) macro function executes SAS functions or user-defined functions and applies an optional format to the function outside a DATA step. 
+                                                        %macro tst(amount);
+                                                          %put %sysfunc(putn(&amount,dollar10.2));
+                                                        %mend tst;
+in a FORMAT statement in a DATA step or a PROC step   - The FORMAT statement permanently associates character variables with character formats and numeric variables with numeric formats.
+                                                        format sales1-sales3 comma10.2;
+in an ATTRIB statement in a DATA step or a PROC step  - The ATTRIB statement can also associate a format, as well as other attributes, with one or more variables.
+                                                        attrib sales1-sales3 format=comma10.2;
+
+Common Format:
+Character
+$CHARw. $w.                                           - standard character data
+$BINARYw. $HEXw. $OCTALw.                             - Converts character data to binary, hexadecimal, octal
+$QUOTEw.                                              - Writes data values that are enclosed in double quotation marks.
+$REVERJw. $REVERSw.                                   - Writes character data in reverse order and preserves blanks/Writes character data in reverse order and left aligns
+$UPCASEw.                                             - Converts character data to uppercase.
+$VARYINGw.                                            - Writes character data of varying length.
+Numeric
+BESTw.                                                - SAS chooses the best notation.
+BESTDw.                                               - Prints numeric values, lining up decimal places for values of similar magnitude, and prints integers without decimals.
+COMMAw.d                                              - Writes numeric values with a comma that separates every three digits and a period that separates the decimal fraction.
+DOLLARw.d                                             - Writes numeric values with a leading dollar sign, a comma that separates every three digits, and a period that separates the decimal fraction.
+w.d                                                   - standard numeric data one digit per byte.
+WORDSw.                                               - Writes numeric values as words.
+Datetime                                
+DATEw.                                                - w specifies the width of the output field. w's range is 5-11, default 7
+                                                        date5.  15MAR
+                                                        date6.   15MAR
+                                                        date7.  15MAR18
+                                                        date8.   15MAR18
+                                                        date9.  15MAR2018
+                                                        date11. 15-MAR-2018
+DATEAMPMw.d/MDYAMPMw.d                                - w specifies the width of the output field. w's range is 7-40, default 19
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DATETIMEw.d                                           - w specifies the width of the output field. w's range is 7-40, default 16
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DAYw./MONTHw./QTRw./YEARw.                            - 
+DDMMYYw./MMDDYYw/YYMMDDw.                             - Writes date values in the form ddmm<yy>yy or dd/mm/<yy>yy, where a forward slash is the separator and the year appears as either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 2-10, default 8
+DDMMYYxw./MMDDYYxw./YYMMDDxw.                         - Writes date values in the form ddmm<yy>yy or dd-mm-yy<yy>, where the x in the format name is a character that represents the special character that separates the day, month, and year. The special character can be a hyphen (-), period (.), blank character, slash (/), colon (:), or no separator; the year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 2-10, default 8
+                                                        x identifies a separator or specifies that no separator appear between the day, the month, and the year. The following values are valid for x:
+                                                          B separates with a blank
+                                                          C separates with a colon
+                                                          D separates with a hyphen
+                                                          N indicates no separator
+                                                          P separates with a period
+                                                          S separates with a slash.
 */
