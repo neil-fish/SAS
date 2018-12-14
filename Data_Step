@@ -201,3 +201,38 @@ DDMMYYxw./MMDDYYxw./YYMMDDxw.                         - Writes date values in th
                                                           P separates with a period
                                                           S separates with a slash.
 */
+
+/*Informat 
+An informat is a type of SAS language element that applies a pattern to or executes instructions for a data value to be read as input. 
+Types of informats correspond to the data's type: numeric, character, date, time, or timestamp. 
+The ability to create user-defined informats is also supported. 
+eg: we need to read data: $1,000,000 then COMMA11. shoud be used as informat.
+
+Syntax:
+<$>informat<w>.<d>                                    - $: indicates a character format. Its absence indicates a numeric format.
+                                                      - format: names the format. The format is a SAS format or a user-defined format that was previously defined with the VALUE statement in PROC FORMAT.
+                                                      - w: pecifies the format width, which for most formats is the number of columns in the output data.
+                                                      - d: specifies an optional decimal scaling factor in the numeric formats.
+
+Attention Point:
+Even though SAS can read up to 32 digits when you specify some numeric informats, numbers with more than 15 significant digits might lose precision due to the limitations of the eight-byte floating-point representation used by most computers.
+Informats always contain a period (.) as a part of the name. If you omit the w and d values from the informat, SAS uses default values. If the data contain decimal points, SAS ignores the d value and reads the number of decimal places that are actually in the input data.
+If the informat width is too narrow to read all the columns in the input data, you might get unexpected results. 
+When a problem occurs with an informat, SAS writes a note to the SAS log and assigns a missing value to the variable. Problems occur if you use an incompatible informat, such as a numeric informat to read character data, or if you specify the width of a date and time informat that causes SAS to read a special character in the last column.
+
+You can use informats in these ways:
+in a INPUT statement                                  - The INPUT statement with an informat after a variable name is the simplest way to read values into a variable. For example, the following INPUT statement uses two informats:
+                                                        input @15 style $3. @21 price 5.2;
+                                                        The $w. character informat reads values into the variable STYLE. The w.d numeric informat reads values into the variable PRICE.
+with the INPUT, INPUTC, or INPUTN functions           - The INPUT function converts a SAS character expression using a specified informat. INPUT works in compile step while INPUTC and INPUTN work in run time.
+                                                        TempCharacter='98.6';
+                                                        TemperatureNumber=input(TempCharacter,4.);
+                                                        Characater is transformed into numeric.
+in a FORMAT statement in a DATA step or a PROC step   - The INFORMAT statement associates an informat with a variable. 
+                                                        informat Birthdate Interview date9.;
+                                                        input @63 Birthdate Interview;
+in an ATTRIB statement in a DATA step or a PROC step  - The ATTRIB statement can also associate an informat, as well as other attributes, with one or more variables.
+                                                        attrib Birthdate Interview informat=date9.;
+                                                        input @63 Birthdate Interview;
+Common Informat:
+*/
