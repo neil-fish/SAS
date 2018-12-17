@@ -235,4 +235,35 @@ in an ATTRIB statement in a DATA step or a PROC step  - The ATTRIB statement can
                                                         attrib Birthdate Interview informat=date9.;
                                                         input @63 Birthdate Interview;
 Common Informat:
+Character	
+$BINARYw./$HEXw./$OCTALw.                             - Converts binary/hexdecimal/octal data to character data.
+$CHARw./$w.                                           - Reads character data with blanks./Reads standard character data.
+$QUOTEw.                                              - Removes matching quotation marks from character data.
+$UPCASEw.                                             - Converts character data to uppercase.
+$VARYINGw.                                            - Reads character data of varying length.
+Date and Time	
+DATEw.                                                - w specifies the width of the output field. w's range is 7-32, default 7
+                                                        date5.  15MAR
+                                                        date6.   15MAR
+                                                        date7.  15MAR18
+                                                        date8.   15MAR18
+                                                        date9.  15MAR2018
+                                                        date11. 15-MAR-2018
+MDYAMPMw.d                                            - Reads datetime values in the form mm-dd-yy<yy> hh:mm:ss.ss AM|PM, where a special character such as a hyphen (-), period (.), slash (/), or colon (:) separates the month, day, and year. The year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 8-40, default 19
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DATETIMEw.d                                           - Reads datetime values in the form ddmmmyy hh:mm:ss.ss or ddmmmyyyy hh:mm:ss.ss.
+                                                        w specifies the width of the output field. w's range is 13-40, default 18
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+YYMMNw./YYQw./MONYYw.                                 - Reads month and year date values in the form yyyymm or yymm / yyQq or yyyyQq / mmmyy or mmmyyyy.
+                                                        w specifies the width of the output field. w's range is 4-32, default 6
+DDMMYYw./MMDDYYw./YYMMDDw.                            - Reads date values in the form ddmmyy or ddmmyyyy / mmddyy or mmddyyyy / yymmdd or yyyymmdd, where a special character, such as a hyphen (-), period (.), or slash (/), separates the day, month, and year; the year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 6-32, default 6
+Numeric	
+BINARYw.d/HEXw./OCTALw.d                              - Converts positive binary/hexadecimal/ positive binary/positive octal values to integers.
+COMMAw.d                                              - Removes embedded characters.
+COMMAXw.d                                             - Removes embedded periods, blanks, dollar signs, percent signs, hyphens, and closing parenthesis from the input data. An open parenthesis at the beginning of a field is converted to a minus sign. The COMMAX informat reverses the roles of the decimal point and the comma.
+FLOATw.d                                              - Reads a native single-precision, floating-point value and divides it by 10 raised to the dth power.
+PERCENTw.d                                            - Reads percentages as numeric values.
+w.d                                                   - Reads standard numeric data.
 */
