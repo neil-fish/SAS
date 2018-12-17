@@ -3,11 +3,16 @@
 
 libname libref "file_path";
 /*Most Common Structure
-DATA work.input(......); 
-SET libref.datset(KEEP=A RENAME=(A=B) WHERE=(B=1) REPLACE= YES FIRSTOBS=2 OBS=10 IN=indicator);
+DATA work.input(......)(REPLACE=YES); 
+SET libref.datset(KEEP=A RENAME=(A=B) WHERE=(B=1) FIRSTOBS=2 OBS=10 IN=indicator);
 FORMAT B 10.2;
 FORMAT C $6.;
-FORMAT DATE date9.;
+FORMAT D date9.;
+E = 1024; *num;
+F = "1024"; *char;
+G = input(F,4.); *num;
+H = put(E,$6.); *char;
+I = put(E,COMMA8.2); *char;
 RUN;
 */
 
@@ -266,4 +271,41 @@ COMMAXw.d                                             - Removes embedded periods
 FLOATw.d                                              - Reads a native single-precision, floating-point value and divides it by 10 raised to the dth power.
 PERCENTw.d                                            - Reads percentages as numeric values.
 w.d                                                   - Reads standard numeric data.
+*/
+
+/*Functions and Call routines
+A function is a component of the SAS programming language that can accept arguments, perform a computation or other operation, and return a value. 
+Functions return either numeric or character results. 
+The value that is returned can be used in an assignment statement or elsewhere in expressions. 
+Many functions are included with SAS, and you can write your own functions as well. You can use FCMP Procedure in Base SAS Procedures Guide to create customized functions.
+Functions are used in DATA step, in a WHERE expression, in macro language statements, in PROC REPORT, and in Structured Query Language (SQL).
+
+A CALL routine alters variable values or performs other system functions. 
+CALL routines are similar to functions, but differ from functions in that you cannot use them in assignment statements or expressions.
+All SAS CALL routines are invoked with CALL statements. That is, the name of the routine must appear after the keyword CALL in the CALL statement.
+
+Syntax:
+function-name (argument-1<, …argument-n>) - max(cash,credit)
+function-name (OF variable-list) - sum(of x  y  z)
+function-name (<argument | OF variable-list | OF array-name[*]><, <argument | OF variable-list | OF array-name[*]>,...>) - msplint(x0,5,of x1-x5,of y1-y5,-2,2)
+
+CALL routine-name (argument-1<, ...argument-n>); - call prxchange('/old/new',1+k,trim(string),result,length);
+CALL routine-name (OF variable-list); - call cats(inventory, of y1-y15, of z1-z15);
+CALL routine-name (argument-1 | OF variable-list-1 <, ...argument-n | OF variable-list-n>);
+
+If the value of an argument is invalid, SAS writes a note or error message to the log and sets the result to a missing value. 
+Some character functions produce resulting variables, or target variables, with a default length of 200 bytes. 
+Numeric target variables have a default length of 8 bytes. 
+The default target variable lengths may not apply some character functions. These functions obtain the length of the return argument based on the length of the first argument.
+SAS provides functions that return descriptive statistics. SAS calculates descriptive statistics for the nonmissing values of the arguments.
+
+Using DATA Step Functions within Macro Functions
+The macro functions %SYSFUNC and %QSYSFUNC can call most DATA step functions to generate text in the macro facility. 
+%SYSFUNC and %QSYSFUNC have one difference: %QSYSFUNC masks the result of the function and %SYSFUNC does not. %SYSFUNC also works with user-defined functions.
+%sysfunc(date(),worddate.)
+Because %SYSFUNC is a macro function, you do not need to enclose character values in quotation marks as you do in DATA step functions. For example, the arguments to the OPEN function are enclosed in quotation marks when you use the function alone, but the arguments do not require quotation marks when used within %SYSFUNC.
+dsid=open("sasuser.houses","i");
+dsid=open("&mydata","&mode");
+%let dsid=%sysfunc(open(sasuser.houses,i));
+%let dsid=%sysfunc(open(&mydata,&mode));
 */
