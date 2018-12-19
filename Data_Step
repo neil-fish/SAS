@@ -21,6 +21,11 @@ RUN;
 Automatic Data Step Variable
 SAS dataset has these veriabls in the data step: 
 _N_
+_NUMERIC_ specifies all numeric variables.
+_CHARACTER_ specifies all character variables.
+_ALL_ specifies all variables.
+_ERROR_
+_TEMPORARY_
 */
 
 /*
@@ -351,4 +356,146 @@ MISSING Function                                      - Returns a numeric result
 N Function                                            - Returns the number of nonmissing numeric values.
 NMISS Function                                        - Returns the number of missing numeric values.
                                                         NMISS requires numeric values, whereas CMISS works with both numeric and character values. NMISS works with multiple numeric values, whereas MISSING works with only one value that can be either numeric or character.
+*/
+
+/*SAS Data Step Statement
+A SAS statement is a string of SAS keywords, SAS names, special characters, and operators that instructs SAS to perform an operation or that gives information to SAS. 
+Each SAS statement ends with a semicolon.
+
+DATA step statements are executable or declarative statements that can appear in the DATA step and run in SAS. 
+Executable statements result in some action during individual iterations of the DATA step. 
+Declarative statements supply information to SAS and take effect when the system compiles program statements.
+
+Executable Statements
+ABORT <ABEND | CANCEL <FILE> | RETURN > <n> <NOLIST>; - Stops executing the current DATA step, SAS job, or SAS session.
+                                                        The ABORT statement causes SAS to stop processing the current DATA step. What happens next depends on the following information:
+                                                        the method that you use to submit your SAS statements
+                                                        the arguments that you use with ABORT
+                                                        your operating environment
+                                                        The ABORT statement usually appears in a clause of an IF-THEN statement or in a SELECT statement that is designed to stop processing when an error occurs.
+                                                        When you execute an ABORT statement in a DATA step, SAS does not use data sets that were created in the step to replace existing data sets with the same name.
+ARRAY array-name { subscript } <$ length | length | VARCHAR(length) | VARCHAR(*)> <array-elements> <(initial-value-list)>;
+                                                      - Defines the elements of an array.
+                                                        Arrays in the SAS language are different from arrays in many other languages. 
+                                                        A SAS array is simply a convenient way of temporarily identifying a group of variables. 
+                                                        It is not a data structure, and array-name is not a variable.
+                                                        eg:
+                                                        array rain {5} janr febr marr aprr mayr;
+                                                        array days{7} d1-d7;
+                                                        array month{*} jan feb jul oct nov;
+                                                        array x{*} _NUMERIC_;
+                                                        array test{4} t1 t2 t3 t4 (90 80 70 70);
+                                                        array test{4} t1-t4 (90 80 2*70);
+                                                        array test{4} _TEMPORARY_ (90 80 70 70);
+                                                        array test2{*} $ a1 a2 a3 ('a','b','c');
+                                                        array new{2:5} green jacobs denato fetzer;
+                                                        array x{5,3} score1-score15;
+                                                        array test{3:4,3:7} test1-test10;
+                                                        array temp{0:999} _TEMPORARY_;
+                                                        array x{10} (2*1:5);
+                                                        then we can use x{i} to replace the variable used in anywhere.
+variable=expression;                                  - Assignment. Evaluates an expression and stores the result in a variable.
+                                                        a = 1+1;
+CALL routine(parameter-1 <, ...parameter-n>);         - Invokes a SAS CALL routine
+                                                        CALL SYMPUTX(macro1, x);
+CONTINUE                                              - Stops processing the current DO-loop iteration and resumes processing the next iteration.
+                                                        do i=1 to 5;
+                                                          input name $ idno status $;
+                                                          if status='PT' then continue;
+                                                          input benefits $10.;
+                                                          output;
+                                                        end;
+DELETE                                                - Stops processing the current observation.
+                                                        When DELETE executes, the current observation is not written to a data set, and SAS returns immediately to the beginning of the DATA step for the next iteration.
+DO;Statements;END;                                    - Specifies a group of statements to be executed as a unit.
+DO;index-variable=specification-1 <, ...specification-n>;Statements;END; 
+                                                      - Iterative. Executes statements between the DO and END statements repetitively, based on the value of an index variable.
+                                                        do month='JAN','FEB','MAR';
+                                                        do count=2,3,5,7,11,13,17;
+                                                        do i=1 to 10;
+                                                        do i=1 to k-1, k+1 to n;
+                                                        do i=.1 to .9 by .1, 1 to 10 by 1,20 to 100 by 10;
+                                                        do i=1 to 10 while(x<y);
+                                                        do i=2 to 20 by 2 until((x/3)>y);
+                                                        do i=10 to 0 by -1 while(month='JAN');
+DO UNTIL(expression);Statements;END;                  - Executes statements in a DO loop repetitively until a condition is true.
+                                                        do until(n>=5);
+                                                          put n=;
+                                                          n+1;
+                                                        end;
+DO WHILE(expression);Statements;END;                  - Executes statements in a DO-loop repetitively while a condition is true.
+                                                        do while(n<5);
+                                                          put n=;
+                                                          n+1;
+                                                        end;
+ERROR <message>;                                      - Sets _ERROR_ to 1. A message written to the SAS log is optional.
+                                                        if type='teen' & age > 19 then
+                                                        error 'type and age don"t match ' age=;
+                                                        above is equivalent to 
+                                                        if type='teen' & age > 19 then
+                                                        do;
+                                                          file log;
+                                                          put 'type and age don"t match ' age=;
+                                                          _error_=1;
+                                                          file file-specification;
+                                                        end;
+FILE
+FILE, ODS
+GO TO
+IF, Subsetting
+IF expression THEN statement; <ELSE statement;>       - Using IF-THEN statements without the ELSE statement causes SAS to evaluate all IF-THEN statements. Using IF-THEN statements with the ELSE statement causes SAS to execute IF-THEN statements until it encounters the first true statement. Subsequent IF-THEN statements are not evaluated.
+INFILE
+INPUT
+INPUT, Column
+INPUT, Formatted
+INPUT, List
+INPUT, Named
+LEAVE
+LINK
+LIST
+LOSTCARD
+MERGE
+MODIFY
+Null
+OUTPUT
+PUT, Column
+PUT, Formatted
+PUT, List
+PUT, Named
+PUT
+PUT, ODS
+PUTLOG
+REDIRECT
+REMOVE
+REPLACE
+RESETLINE
+RETURN
+SELECT
+SET
+STOP
+Sum
+UPDATE
+
+Declarative Statements
+ARRAY
+DATALINES4
+Labels, Statement
+ATTRIB
+DROP
+LENGTH
+BY
+END
+RENAME
+CARDS
+FORMAT
+RETAIN
+CARDS4
+INFORMAT
+WHERE
+DATA
+KEEP
+WINDOW
+DATALINES
+LABEL
+
 */
