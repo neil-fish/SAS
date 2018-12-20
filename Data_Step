@@ -365,34 +365,24 @@ DATA step statements are executable or declarative statements that can appear in
 Executable statements result in some action during individual iterations of the DATA step. 
 Declarative statements supply information to SAS and take effect when the system compiles program statements.
 
+Main DATA Statements(which is declarative):
+DATA <data-set-name-1 <(data-set-options-1)> > <...data-set-name-n <(data-set-options-n)> > </ <DEBUG> <NESTING> <STACK=stack-size> > <NOLIST>;
+                                                      - DATA statement for creating output data sets
+                                                        DEBUG: enables you to debug your program interactively by helping identify logic errors, and sometimes data errors.
+                                                        NESTING: specifies that a note is printed to the SAS log for the beginning and end of each DO-END and SELECT-END nesting level. This option enables you to debug mismatched DO-END and SELECT-END statements and is particularly useful in large programs where the nesting level is not obvious.
+                                                        STACK=stack-size: specifies the maximum number of nested LINK statements.
+                                                        NOLIST: suppresses the output of all variables to the SAS log when the value of _ERROR_ is 1
+DATA view-name <data-set-name-1 <(data-set-options-1)> > <...data-set-name-n <(data-set-options-n)> > / VIEW=view-name <(<password-option> <SOURCE=source-option> )> <NESTING> <NOLIST>;                                                     
+                                                      - DATA statement for creating a DATA step view
+DATA data-set-name / PGM=program-name <(<password-option> <SOURCE=source-option> )> <NESTING> <NOLIST>;        
+                                                      - DATA statement for creating a stored compiled DATA step program
+DATA PGM=program-name <(password-option)> <NOLIST>;
+<DESCRIBE;>
+<REDIRECT INPUT | OUTPUT old-name-1 = new-name-1<… old-name-n = new-name-n> ;>
+<EXECUTE;>                                                      
+                                                      - DATA statement for use with a stored compiled DATA step program                                                      
+
 Executable Statements
-ABORT <ABEND | CANCEL <FILE> | RETURN > <n> <NOLIST>; - Stops executing the current DATA step, SAS job, or SAS session.
-                                                        The ABORT statement causes SAS to stop processing the current DATA step. What happens next depends on the following information:
-                                                        the method that you use to submit your SAS statements
-                                                        the arguments that you use with ABORT
-                                                        your operating environment
-                                                        The ABORT statement usually appears in a clause of an IF-THEN statement or in a SELECT statement that is designed to stop processing when an error occurs.
-                                                        When you execute an ABORT statement in a DATA step, SAS does not use data sets that were created in the step to replace existing data sets with the same name.
-ARRAY array-name { subscript } <$ length | length | VARCHAR(length) | VARCHAR(*)> <array-elements> <(initial-value-list)>;
-                                                      - Defines the elements of an array.
-                                                        Arrays in the SAS language are different from arrays in many other languages. 
-                                                        A SAS array is simply a convenient way of temporarily identifying a group of variables. 
-                                                        It is not a data structure, and array-name is not a variable.
-                                                        eg:
-                                                        array rain {5} janr febr marr aprr mayr;
-                                                        array days{7} d1-d7;
-                                                        array month{*} jan feb jul oct nov;
-                                                        array x{*} _NUMERIC_;
-                                                        array test{4} t1 t2 t3 t4 (90 80 70 70);
-                                                        array test{4} t1-t4 (90 80 2*70);
-                                                        array test{4} _TEMPORARY_ (90 80 70 70);
-                                                        array test2{*} $ a1 a2 a3 ('a','b','c');
-                                                        array new{2:5} green jacobs denato fetzer;
-                                                        array x{5,3} score1-score15;
-                                                        array test{3:4,3:7} test1-test10;
-                                                        array temp{0:999} _TEMPORARY_;
-                                                        array x{10} (2*1:5);
-                                                        then we can use x{i} to replace the variable used in anywhere.
 variable=expression;                                  - Assignment. Evaluates an expression and stores the result in a variable.
                                                         a = 1+1;
 CALL routine(parameter-1 <, ...parameter-n>);         - Invokes a SAS CALL routine
@@ -550,37 +540,125 @@ PUT <specification(s)> <_ODS_> <@ | @@>;              - Writes lines to the SAS 
                                                         PUT, List: put 'Week of ' date ~ worddate15. salesrep ~ $12. 'sales were ' tot ~ dollar9.  + (-1) '.';
                                                         PUT, Named: put name = @20 score1= score3= ;
 PUTLOG ' message'                                     - Writes a message to the SAS log.
-REDIRECT
-REMOVE
-REPLACE
-RESETLINE
-RETURN
-SELECT
-SET
-STOP
-Sum
-UPDATE
+RETURN                                                - The RETURN statement causes execution to stop at the current point in the DATA step, and returns control to a previous DATA step statement.
+SELECT <(select-expression)> ;
+  WHEN (when-expression-1 <..., when-expression-n> ) statement;
+  <... WHEN (when-expression-1 <...,when-expression-n> ) statement;>
+  < OTHERWISE statement;>
+END;                                                  - Executes one of several statements or groups of statements.
+                                                        select (a);
+                                                        when (1) x=x*10;
+                                                        when (2);
+                                                        when (3,4,5) x=x*100;
+                                                        otherwise;
+                                                        end;
+SET                                                   - Reads an observation from one or more SAS data sets.
+STOP                                                  - Stops execution of the current DATA step and resume processing statements after the end of the current DATA step.
+variable+expression;                                  - Sum
+                                                        retain variable 0;
+                                                        variable=sum(variable,expression);
 
 Declarative Statements
-ARRAY
-DATALINES4
-Labels, Statement
-ATTRIB
-DROP
-LENGTH
-BY
-END
-RENAME
-CARDS
-FORMAT
-RETAIN
-CARDS4
-INFORMAT
-WHERE
-DATA
-KEEP
-WINDOW
-DATALINES
-LABEL
+ARRAY array-name { subscript } <$ length | length | VARCHAR(length) | VARCHAR(*)> <array-elements> <(initial-value-list)>;
+                                                      - Defines the elements of an array.
+                                                        Arrays in the SAS language are different from arrays in many other languages. 
+                                                        A SAS array is simply a convenient way of temporarily identifying a group of variables. 
+                                                        It is not a data structure, and array-name is not a variable.
+                                                        eg:
+                                                        array rain {5} janr febr marr aprr mayr;
+                                                        array days{7} d1-d7;
+                                                        array month{*} jan feb jul oct nov;
+                                                        array x{*} _NUMERIC_;
+                                                        array test{4} t1 t2 t3 t4 (90 80 70 70);
+                                                        array test{4} t1-t4 (90 80 2*70);
+                                                        array test{4} _TEMPORARY_ (90 80 70 70);
+                                                        array test2{*} $ a1 a2 a3 ('a','b','c');
+                                                        array new{2:5} green jacobs denato fetzer;
+                                                        array x{5,3} score1-score15;
+                                                        array test{3:4,3:7} test1-test10;
+                                                        array temp{0:999} _TEMPORARY_;
+                                                        array x{10} (2*1:5);
+                                                        then we can use x{i} to replace the variable used in anywhere.
+DATALINES,CARDS, DATALINES4,CARDS4                    - Specifies that data lines follow./ Indicates that data lines that contain semicolons follow.
+                                                        datalines; /* use ; to tell the end of dataline*/
+                                                        John Sales
+                                                        Mary Acctng
+                                                        ;
+                                                        datalines4;/* use ;;;; to tell the end of dataline*/
+                                                          KIRK, 1988 
+                                                        2  LIN ET AL., 1995; BRADY, 1993
+                                                        3  BERG, 1990; ROA, 1994; WILLIAMS, 1992
+                                                        ;;;;
+labels: Statements                                    - Identifies a statement that is referred to by another statement.
+                                                        reorder: input Supplier $;
+LABEL variable-1=label-1<...variable-n=label-n>;      - Assigns descriptive labels to variables 
+ATTRIB variable-list(s) attribute-list(s);            - Associates a format, informat, label, and length with one or more variables.
+DROP variable-list;                                   - Excludes variables from output SAS data sets.
+KEEP variable-list;                                   - Specifies the variables to include in output SAS data sets.
+LENGTH variable-specification(s) <DEFAULT=n>;         - Specifies the number of bytes for storing character and numeric variables, or the number of characters for storing VARCHAR variables.
+BY <DESCENDING> variable-1 <...<DESCENDING> variable-n> <NOTSORTED> <GROUPFORMAT>;
+                                                      - Controls the operation of a SET, MERGE, MODIFY, or UPDATE statement in the DATA step and sets up special grouping variables.
+                                                        DESCENDING: specifies that the data sets are sorted in descending order by the variable that is specified. 
+                                                        GROUPFORMAT: uses the formatted values, instead of the internal values, of the BY variables to determine where BY groups begin and end, and therefore how FIRST.variable and LAST.variable are assigned. 
+                                                                     Although the GROUPFORMAT option can appear anywhere in the BY statement, the option applies to all variables in the BY statement.
+                                                        NOTSORTED: specifies that observations with the same BY value are grouped together but are not necessarily sorted in alphabetical or numeric order.
+                                                        
+                                                        SAS identifies the beginning and end of a BY group by creating two temporary variables for each BY variable: FIRST.variable and LAST.variable. 
+                                                        The value of these variables is either 0 or 1. 
+                                                        SAS sets the value of FIRST.variable to 1 when it reads the first observation in a BY group, and sets the value of LAST.variable to 1 when it reads the last observation in a BY group. 
+                                                        These temporary variables are available for DATA step programming but are not added to the output data set.
+                                                        The data sets that are listed in the SET, MERGE, or UPDATE statements must be sorted by the values of the variables that are listed in the BY statement or have an appropriate index. 
+END                                                   - Ends a DO group or SELECT group processing.
+RENAME old-name-1=new-name-1 <...old-name-n=new-name-n>;
+                                                      - Specifies new names for variables in output SAS data sets.
+FORMAT variable-1 <...variable-n> format <DEFAULT=default-format>;
+                                                      - Associates formats with variables.
+INFORMAT <variable-1> <… variable-n> <DEFAULT=default-informat>;
+                                                      - Associates informats with variables.
+RETAIN <element-list(s) <initial-value(s) | (initial-value-1) | (initial-value-list-1)> <... element-list-n <initial-value-n | (initial-value-n ) | (initial-value-list-n)> >> ;
+                                                      - Causes a variable that is created by an INPUT or assignment statement to retain its value from one iteration of the DATA step to the next.
+                                                        retain month1-month5;
+                                                        retain month1-month5 1 year 0 a b c 'XYZ';
+                                                        retain month1-month5 (1);
+                                                        retain _all_;
+                                                        retain var1-var4 (1 2 3 4);
+                                                        retain var1-var4 (1,2,3,4);
+                                                        retain var1-var4(1:4);
+WHERE where-expression-1 < logical-operator where-expression-n>;
+                                                      - Selects observations from SAS data sets that meet a particular condition.
+                                                        Using the WHERE statement might improve the efficiency of your SAS programs because SAS is not required to read all observations from the input data set.                                  -
+*/
 
+/*Operator
+Operator Type       Symbol or Mnemonic        Description
+Arithmetic
+                    *                         multiplication
+                    /                         division
+                    +                         addition
+                    −                         subtraction
+                    **                        exponentiation
+Comparison
+                    = or EQ                   equal to
+                    ^=, ¬=, ~=, or NE1        not equal to
+                    > or GT                   greater than
+                    < or LT                   less than
+                    >= or GE                  greater than or equal to
+                    <= or LE                  less than or equal to
+                    IN                        equal to one of a list
+Logical (Boolean)         
+                    & or AND                  logical and
+                    | or OR                   logical or
+                    ~,^ , ¬, or NOT           logical not
+Other                      
+                    ||                        concatenation of character variables
+                    ( )                       indicate order of evaluation
+                    + prefix                  positive number
+                    − prefix                  negative number
+WHERE Expression Only
+                    BETWEEN–AND               an inclusive range
+                    ? or CONTAINS             a character string
+                    IS NULL or IS MISSING     missing values
+                    LIKE                      match patterns
+                    =*                        sounds-like
+                    SAME-AND                  add clauses to an existing WHERE statement without retyping original one
 */
