@@ -538,19 +538,18 @@ LINK                                                  - Directs program executio
                                                           aluv 666 site_2
                                                           ;  
                                                         run;
-LIST
-LOSTCARD
-MERGE
-MODIFY
-Null
-OUTPUT
-PUT
-PUT, Column
-PUT, Formatted
-PUT, List
-PUT, Named
-PUT, ODS
-PUTLOG
+LIST                                                  - Writes to the SAS log the input data record for the observation that is being processed.
+MERGE AS-data-set-1 <(data-set-options)> SAS-data-set-2 <(data-set-options) > <...SAS-data-set-n <(data-set-options)> > <END=variable>;
+                                                      - Joins observations from two or more SAS data sets into a single observation.
+                                                          END=variable: names and creates a temporary variable that contains an end-of-file indicator.
+OUTPUT <data-set-name(s)>;                            - Writes the current observation to a SAS data set.
+                                                        Once you use an OUTPUT statement to write an observation to any one data set, however, there is no implicit OUTPUT statement at the end of the DATA step. 
+PUT <specification(s)> <_ODS_> <@ | @@>;              - Writes lines to the SAS log, to the SAS output window, or to an external location that is specified in the most recent FILE statement.
+                                                        PUT, Column: put name 1-10 gender 16;
+                                                        PUT, Formatted: put (grades1-grades5) (3*7.2, 2*5.2);
+                                                        PUT, List: put 'Week of ' date ~ worddate15. salesrep ~ $12. 'sales were ' tot ~ dollar9.  + (-1) '.';
+                                                        PUT, Named: put name = @20 score1= score3= ;
+PUTLOG ' message'                                     - Writes a message to the SAS log.
 REDIRECT
 REMOVE
 REPLACE
