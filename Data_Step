@@ -674,3 +674,20 @@ WHERE Expression Only
                     =*                        sounds-like
                     SAME-AND                  add clauses to an existing WHERE statement without retyping original one
 */
+
+/*Utility
+%DS2CSV(argument-1=value-1, argument-2=value-2 <,argument-3=value-3 ...>)
+                                                      - Converts SAS data sets to comma-separated value (CSV) files.
+                                                        colhead=Y | N: indicates whether to include column headings in the CSV file. The column headings that are used depend on the setting of the LABELS argument. By default, column headings are included as the first record of the CSV file.
+                                                        data=SAS-data-set-name: specifies the SAS data set that contains the data that you want to convert into a CSV file. This argument is required. However, if you omit the data set name, DS2CSV attempts to use the most recently created SAS data set.
+                                                        formats=Y | N: indicates whether to apply the data set's defined variable formats to the values in the CSV file. By default, all formats are applied to values before they are added to the CSV file. The formats must be stored in the data set in order for them to be applied.
+                                                        labels=Y | N: indicates whether to use the SAS variable labels that are defined in the data set as your column headings. The DS2CSV macro uses the variable labels by default. If a variable does not have a SAS label, then use the name of the variable. Specify labels=N to use variable names instead of the SAS labels as your column headings.
+                                                        pw=password: specifies the password that is needed to access a password-protected data set. This argument is required if the data set has a READ or PW password. (You do not need to specify this argument if the data set has only WRITE or ALTER passwords.)
+                                                        sepchar=separator-character: specifies the character that is used for the separator character. Specify the two-character hexadecimal code for the character or omit this argument to get the default setting. The default settings are 2C for ASCII systems and 6B for EBCDIC systems. (These settings represent commas (,) on their respective systems.)
+                                                        var=var1 var2 ...: specifies the variables that are to be included in the CSV file and the order in which they should be included. To include all of the variables in the data set, do not specify this argument. If you want to include only a subset of the variables, then list each variable name and use single blank spaces to separate the variables. Do not use a comma in the list of variable names.
+                                                                           Restriction	A range of values is not valid. For example, var1–var4.
+                                                        where=where-expression: specifies a valid WHERE clause that selects observations from the SAS data set. Using this argument subsets your data based on the criteria that you supply for where-expression.
+                                                        
+                                                        %ds2csv (data=sashelp.retail, runmode=b, csvfile=c:\temp\retail.csv);
+*/
+                                                           
