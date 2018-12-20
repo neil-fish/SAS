@@ -322,38 +322,50 @@ The function returns a value that you can check with statements or other functio
 After the records are processed, the FWRITE function writes the contents of the FDB to the external file, and the FCLOSE function closes the file.
 
 Most commonly used functions:
-CALL SYMPUTX Routine                                  - Assigns a value to a macro variable, and removes both leading and trailing blanks.
-CALL SYMPUT Routine                                   - Assigns DATA step information to a macro variable.
-CATS Function                                         - Removes leading and trailing blanks, and returns a concatenated character string.
-CATX Function                                         - Removes leading and trailing blanks, inserts delimiters, and returns a concatenated character string.
-COMPRESS Function                                     - Returns a character string with specified characters removed from the original string.
-COUNTW Function                                       - Counts the number of words in a character string.
-DATEPART Function                                     - Extracts the date from a SAS datetime value.
-DOSUBL Function                                       - Imports macro variables from the calling environment, and exports macro variables back to the calling environment.
-EXIST Function                                        - Verifies the existence of a SAS library member.
-FILEEXIST Function                                    - Verifies the existence of an external file by its physical name.
-INDEX Function                                        - Searches a character expression for a string of characters, and returns the position of the string's first character for the first occurrence of the string.
-INPUT Function                                        - Returns the value that is produced when SAS converts an expression by using the specified informat.
-INTNX Function                                        - Increments a date, time, or datetime value by a given time interval, and returns a date, time, or datetime value.
-LAG Function                                          - Returns values from a queue.
-LENGTH Function                                       - Returns the length of a non-blank character string, excluding trailing blanks, and returns 1 for a blank character string.
-PUT Function                                          - Returns a value using a specified format.
-ROUND Function                                        - Rounds the first argument to the nearest multiple of the second argument, or to the nearest integer when the second argument is omitted.
-SCAN Function                                         - Returns the nth word from a character string.
-STRIP Function                                        - Returns a character string with all leading and trailing blanks removed.
+CALL SYMPUTX (macro-variable, value <, symbol-table>);
+                                                      - Assigns a value to a macro variable, and removes both leading and trailing blanks.
+CALL SYMPUT CALL SYMPUT(argument-1, argument-2);
+                                                      - Assigns DATA step information to a macro variable.
+CATS (item-1 <, …, item-n>)
+                                                      - Removes leading and trailing blanks, and returns a concatenated character string.
+CATX (delimiter, item-1 <, ... item-n>)
+                                                      - Removes leading and trailing blanks, inserts delimiters, and returns a concatenated character string.
+COMPRESS (source <, characters> <, modifier(s)>)
+                                                      - Returns a character string with specified characters removed from the original string.
+COUNTW (<string> <, <character(s)> <, <modifier(s)>>>)
+                                                      - Counts the number of words in a character string.
+DATEPART (datetime)                                   - Extracts the date from a SAS datetime value.
+DOSUBL (x), CALL EXECUTE (x)                          - Imports macro variables from the calling environment, and exports macro variables back to the calling environment.
+EXIST (member-name <, member-type <, generation>>)    - Verifies the existence of a SAS library member.
+FILEEXIST (file-name)                                 - Verifies the existence of an external file by its physical name.
+INDEX (source, excerpt)                               - Searches a character expression for a string of characters, and returns the position of the string's first character for the first occurrence of the string.
+INPUT (source, <? | ??> informat.)                    - Returns the value that is produced when SAS converts an expression by using the specified informat.
+INTCK(interval <multiple> <.shift-index>, start-date, end-date, <'method'>)
+                                                      - Returns the number of interval boundaries of a given kind that lie between two dates, times, or datetime values.
+INTNX (interval <multiple><.shift-index>, start-from, increment <, 'alignment'>)
+                                                      - Increments a date, time, or datetime value by a given time interval, and returns a date, time, or datetime value.
+LAG <n> (argument)                                    - Returns values from a queue.
+LENGTH (string)                                       - Returns the length of a non-blank character string, excluding trailing blanks, and returns 1 for a blank character string.
+PUT (source, format.)                                 - Returns a value using a specified format.
+ROUND (argument <, rounding-unit>)                    - Rounds the first argument to the nearest multiple of the second argument, or to the nearest integer when the second argument is omitted.
+SCAN (string, count <, character-list <, modifier>>)
+                                                      - Returns the nth word from a character string.
+STRIP (string)                                        - Returns a character string with all leading and trailing blanks removed.
 SUBSTR (left of =) Function                           - Replaces character value contents.
 SUBSTR (right of =) Function                          - Extracts a substring from an argument.
-SUM Function                                          - Returns the sum of the nonmissing arguments.
-TIME Function                                         - Returns the current time of day as a numeric SAS time value.
-TIMEPART Function                                     - Extracts a time value from a SAS datetime value.
-TRANWRD Function                                      - Replaces all occurrences of a substring in a character string.
-TRANSLATE Function                                    - Replaces specific characters in a character expression.
-TODAY Function                                        - Returns the current date as a numeric SAS date value.
-ZIPCITYDISTANCE Function                              - Returns the geodetic distance between two ZIP code locations.
-CMISS Function                                        - Counts the number of missing arguments.
-MISSING Function                                      - Returns a numeric result that indicates whether the argument contains a missing value.
-N Function                                            - Returns the number of nonmissing numeric values.
-NMISS Function                                        - Returns the number of missing numeric values.
+SUM (argument-1 <, argument-2, ...>)                  - Returns the sum of the nonmissing arguments.
+TIME ()                                               - Returns the current time of day as a numeric SAS time value.
+TIMEPART (datetime)                                   - Extracts a time value from a SAS datetime value.
+TRANWRD (source, target, replacement)                 - Replaces all occurrences of a substring in a character string.
+TRANSLATE (source, to-1, from-1 <, ...to-n, from-n>)  - Replaces specific characters in a character expression.
+                                                        x=translate('XYZW', 'AB', 'VW');  /*x=XYZB*/                                                                                                                                                                                                                    
+                                                        y=translate('AABBAABABB','12','AB');  /*y=1122112122*/
+TODAY ()                                              - Returns the current date as a numeric SAS date value.
+ZIPCITYDISTANCE (ZIP-code-1, ZIP-code-2)              - Returns the geodetic distance between two ZIP code locations in the United States of America.
+CMISS (argument-1 <, argument-2,…>)                   - Counts the number of missing arguments.
+MISSING (numeric-expression | character-expression)   - Returns a numeric result that indicates whether the argument contains a missing value.
+N (argument-1 <, ... argument-n>)                     - Returns the number of nonmissing numeric values.
+NMISS (argument-1 <,... argument-n>)                  - Returns the number of missing numeric values.
                                                         NMISS requires numeric values, whereas CMISS works with both numeric and character values. NMISS works with multiple numeric values, whereas MISSING works with only one value that can be either numeric or character.
 */
 
