@@ -1,1 +1,693 @@
 *This file is SAS data step cheatsheet;
+*https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=pgmsashome&docsetTarget=home.htm&locale=en; 
+
+libname libref "file_path";
+/*Most Common Structure
+DATA work.input(......)(REPLACE=YES); 
+SET libref.datset(KEEP=A RENAME=(A=B) WHERE=(B=1) FIRSTOBS=2 OBS=10 IN=indicator);
+FORMAT B 10.2;
+FORMAT C $6.;
+FORMAT D date9.;
+E = 1024; *num;
+F = "1024"; *char;
+G = input(F,4.); *num;
+H = put(E,$6.); *char;
+I = put(E,COMMA8.2); *char;
+RUN;
+*/
+
+/*
+Automatic Data Step Variable
+SAS dataset has these veriabls in the data step: 
+_N_
+_NUMERIC_ specifies all numeric variables.
+_CHARACTER_ specifies all character variables.
+_ALL_ specifies all variables.
+_ERROR_
+_TEMPORARY_
+*/
+
+/*
+Dataset Options:
+1  rename variables
+2  select only the first or last n observations for processing
+3  drop variables from processing or from the output dataset
+4  specify a password for a dataset
+
+Most SAS data set options apply to either input or output SAS data sets in DATA steps or procedure (PROC) steps. 
+If a data set option is associated with an input data set, the action applies to the data set that is being read. 
+If the data set option appears in the DATA statement or after an output data set specification in a PROC step, SAS applies the action to the output data set. 
+
+When data set options appear in input and output data sets in the same DATA or PROC step, 
+SAS first applies data set options to input data sets. 
+Then SAS evaluates programming statements or applies data set options to output data sets.
+
+Timing can also be an issue in some cases. 
+For example, if you are using KEEP= and RENAME= on a data set that is specified in the SET statement, 
+KEEP= needs to use the original variable names. SAS processes KEEP= before the data set is read. 
+The new names that are specified in RENAME= apply to the programming statements that follow the SET statement.
+
+Many system options and data set options share the same name and have the same function. 
+System options remain in effect for all DATA steps and PROC steps in a SAS job or session.
+The data set option overrides the system option for the data set in the step in which it appears.
+  eg:
+  options obs=100; system options    
+  data final;
+     set two(obs=5) three;  dataset options
+  run;
+
+Syntax DATA libref.dataset(OPTIONS);  eg: DATA old(rename=(date=Start_Date));
+
+Data Set Control	
+ALTER= password	                                      - Assigns an ALTER= password to a SAS file that prevents users from replacing or deleting the file, and enables access to a read- and write-protected file.
+COMPRESS= NO | YES | CHAR | BINARY                    - Specifies how observations are compressed in a new output SAS data set. In general, COMPRESS=CHAR provides good compression when single bytes repeat, eg:"aaaaaa"; COMPRESS=BINARY provides good compression when strings of bytes repeat, eg:"abcabc".
+DLDMGACTION= FAIL | ABORT | REPAIR | NOINDEX | PROMPT - Specifies the action to take when a SAS data set in a SAS library is detected as damaged. 
+                                                        FAIL:stops the step and issues an error message to the log immediately. This is the default for batch mode.
+                                                        ABORT:stops the step, issues an error message to the log, and terminates the SAS session.
+                                                        REPAIR:attempts to automatically repair a damaged data set on the next attempt to open the damaged file. The data set might truncate at the point of damage. The REPAIR option re-creates the index or indexes. If the damage is too severe, the auto repair attempt might not be successful.
+                                                        NOINDEX:automatically repairs the data file without the indexes and integrity constraints. 
+                                                        PROMPT:displays a dialog box that asks you to select the FAIL, ABORT, REPAIR, or NOINDEX action.
+ENCRYPT= AES | AES2 | NO | YES                        - No by default. Specifies whether to encrypt an output SAS data set.
+                                                        AES | AES2: encryption methodology. must use encryptkey=password to assign password
+                                                        YES: must use read=password to assign password
+ENCRYPTKEY= password                                  - Specifies a key value for AES (Advanced Encryption Standard) encryption.
+                                                        1 to 64 bytes; not supported in a DATA step that runs in CAS; Use only with SAS 9.4 or later; Use only with AES-encrypted data files.
+READ= password                                        - Assigns a READ= password to a SAS file that prevents users from reading the file, unless they enter the password.
+                                                        not supported in a DATA step that runs in CAS.
+INDEX= (variable(s) </UNIQUE> </NOMISS> )             - Defines an index for a new output SAS data set.
+                                                        data new(index=(ssn));
+                                                        data new(index=(cityst=(city state)));
+                                                        data new(index=(ssn /unique));
+                                                        data new(index=(ssn /nomiss));
+                                                        data new(index=(ssn /unique/nomiss cityst=(city state) /unique/nomiss));
+LABEL= 'label'                                        - Specifies a label for a SAS data set.
+                                                        a text string of up to 256 bytes. 
+                                                        If the label text contains single quotation marks, enclose the label in double quotation marks. 
+                                                        To remove a label from a data set, assign a blank space that is enclosed in quotation marks to the label.
+                                                        You can also use two single quotation marks in the label text and enclose the string in single quotation marks.
+PW= password                                          - Assigns a READ, WRITE, and ALTER password to a SAS file, and enables access to a password-protected SAS file.
+                                                        password must be a valid SAS name, which limits the password to eight characters and is case-insensitive.
+REPEMPTY= YES | NO                                    - Specifies whether a new, empty data set can overwrite an existing SAS data set.
+                                                        By default is YES. Suggest to set it NO
+REPLACE= NO | YES                                     - Specifies whether a new SAS data set that contains data can overwrite an existing data set.
+                                                        Use REPLACE=YES and REPEMPTY=NO for the convenience of replacing existing data sets with new ones that contain data.
+SORTEDBY= by-clause</ collate-name> | _NULL_          - Specifies how a data set is currently sorted. No need to sort the dataset again 
+                                                        by-clause: names the variables and options that you use in a BY statement in a PROC SORT step.
+                                                        collate-name: names the collating sequence that is used for the sort. By default, the collating sequence is that of your operating environment. A slash (/) must precede the collating sequence. 
+                                                        _NULL_: removes any existing sort indicator.
+TYPE= data-set-type                                   - Specifies the data set type for a specially structured SAS data set.
+                                                        You can use the CONTENTS procedure to determine the type of data set.
+                                                        Most SAS data sets do not have a specified type. 
+                                                        However, there are several specially structured SAS data sets that are used by some SAS/STAT procedures. 
+                                                        Some of the special data sets are CORR, COV, SSPC, EST, and FACTOR.
+WRITE= write-password                                 - Assigns a WRITE= password to a SAS file that prevents users from writing to a file, unless the users enter the password.
+                                                        must be a valid SAS name.
+Observation Control	
+FIRSTOBS= n | nK | nM | nG | hexX | MIN | MAX         - Specifies the first observation that SAS processes in a SAS data set.
+                                                        n | nK | nM | nG: 8 specifies the eighth observation, and a value of 3k specifies 3,072.
+                                                        hexX: 2dx sets the 45th observation as the first observation to process.
+                                                        MIN: sets the number of the first observation to process to 1. This is the default.
+                                                        MAX: sets the number of the first observation to process to the maximum number of observations in the data set. This number can be up to the largest eight-byte, signed integer, which is 263–1, or approximately 9.2 quintillion observations.
+IN= variable                                          - Creates a Boolean variable that indicates whether the data set contributed data to the current observation.
+                                                        variable names the new variable whose value indicates whether the input data set contributed data to the current observation. Within the DATA step, the value of the variable is 1 if the data set contributed to the current observation. Otherwise, the value is 0.
+OBS= n | nK | nM | nG | nT | hexX | MIN | MAX         - Specifies the last observation that SAS processes in a data set.
+POINTOBS= YES | NO                                    - Specifies whether SAS creates compressed data sets whose observations can be randomly accessed or sequentially accessed.
+                                                        YES: need to access data by observation number in a compressed data set. It does increase CPU usage by approximately 10%
+                                                        NO: do not need to access data by observation number in a compressed data set
+                                                        Because POINTOBS=YES is the default when you use compression, REUSE=YES causes POINTOBS= to change to NO
+WHERE= (where-expression-1 <logical-operator where-expression-2> )
+                                                      - Specifies specific conditions to use to select observations from a SAS data set.
+                                                        where-expression is an arithmetic or logical expression that consists of a sequence of operators, operands, and SAS functions. 
+                                                        logical-operator can be AND, AND NOT, OR, or OR NOT.
+                                                        The expression must be enclosed in parentheses.
+Variable Control	
+DROP= variable(s)                                     - For an input data set, excludes the specified variables from processing; for an output data set, excludes the specified variables from being written to the data set.
+KEEP= variable(s)                                     - For an input data set, specifies the variables to process; for an output data set, specifies the variables to write to the data set.
+RENAME= (old-variable-name-1=new-variable-name-1 <old-variable-name-2=new-variable-name-2 ...> )
+                                                      - Changes the name of a variable.
+                                                        If you use RENAME= with WHERE processing such as a WHERE statement or a WHERE= data set option, the new name is applied before the data is processed. You must use the new name in the WHERE expression.
+                                                        The DROP= and KEEP= data set options are applied before RENAME=. You must use the old name in the DROP= and KEEP= data set options. 
+*/
+
+/*Format
+A format is a type of SAS language element that applies a pattern to or executes instructions for a data value to be displayed or written as output. 
+Types of formats correspond to the type of data: numeric, character, date, time, or timestamp. 
+The ability to create user-defined formats is also supported. 
+Examples of SAS formats are BINARY, DATE, and WORDS. For example, the WORDS22. format, which converts numeric values to their equivalent in words, writes the numeric value 692 as six hundred ninety-two.
+
+Syntax:
+<$>format<w>.<d>                                      - $: indicates a character format. Its absence indicates a numeric format.
+                                                      - format: names the format. The format is a SAS format or a user-defined format that was previously defined with the VALUE statement in PROC FORMAT.
+                                                      - w: pecifies the format width, which for most formats is the number of columns in the output data.
+                                                      - d: specifies an optional decimal scaling factor in the numeric formats.
+eg:
+DOLLAR10.2
+the w value of 10 specifies a maximum of 10 columns for the value. 
+The d value of 2 specifies that two of these columns are for the decimal part of the value, which leaves eight columns for the remaining characters in the value. 
+The remaining columns include the decimal point, the remaining numeric value, a minus sign if the value is negative, the dollar sign, and commas, if any.
+
+Attention Point:
+If the format width is too narrow to represent a value, SAS tries to squeeze the value into the space available. 
+Character formats truncate values on the right. Numeric formats sometimes revert to the BESTw.d format. 
+SAS prints asterisks if you do not specify an adequate width. In the following example, the result is x=**.
+If you use an incompatible format, such as a numeric format to write character values, SAS first attempts to use an analogous format of the other type. 
+If this attempt fails, an error message that describes the problem is displayed in the SAS log.
+When the value of d is greater than 15, the precision of the decimal value after the 15th significant digit might not be accurate.
+
+You can use formats in these ways:
+in a PUT statement                                    - The PUT statement with a format after the variable name uses a format to write data values in a DATA step. PUT statement writes a value to an external destination (either the SAS log or a destination, that you specify).
+                                                        amount=1145.32;
+                                                        put amount dollar10.2;
+with the PUT, PUTC, or PUTN functions                 - The PUT function converts a numeric variable, a character variable, or a constant by using any valid format and then returns the resulting character value. PUT works in compile step while PUTC and PUTN work in run time.
+                                                        num=15;
+                                                        char=put(num,hex2.); *char has a character value;
+with the %SYSFUNC macro function                      - The %SYSFUNC (or %QSYSFUNC) macro function executes SAS functions or user-defined functions and applies an optional format to the function outside a DATA step. 
+                                                        %macro tst(amount);
+                                                          %put %sysfunc(putn(&amount,dollar10.2));
+                                                        %mend tst;
+in a FORMAT statement in a DATA step or a PROC step   - The FORMAT statement permanently associates character variables with character formats and numeric variables with numeric formats.
+                                                        format sales1-sales3 comma10.2;
+in an ATTRIB statement in a DATA step or a PROC step  - The ATTRIB statement can also associate a format, as well as other attributes, with one or more variables.
+                                                        attrib sales1-sales3 format=comma10.2;
+
+Common Format:
+Character
+$CHARw. $w.                                           - standard character data
+$BINARYw. $HEXw. $OCTALw.                             - Converts character data to binary, hexadecimal, octal
+$QUOTEw.                                              - Writes data values that are enclosed in double quotation marks.
+$REVERJw. $REVERSw.                                   - Writes character data in reverse order and preserves blanks/Writes character data in reverse order and left aligns
+$UPCASEw.                                             - Converts character data to uppercase.
+$VARYINGw.                                            - Writes character data of varying length.
+Numeric
+BESTw.                                                - SAS chooses the best notation.
+BESTDw.                                               - Prints numeric values, lining up decimal places for values of similar magnitude, and prints integers without decimals.
+COMMAw.d                                              - Writes numeric values with a comma that separates every three digits and a period that separates the decimal fraction.
+DOLLARw.d                                             - Writes numeric values with a leading dollar sign, a comma that separates every three digits, and a period that separates the decimal fraction.
+w.d                                                   - standard numeric data one digit per byte.
+WORDSw.                                               - Writes numeric values as words.
+Datetime                                
+DATEw.                                                - w specifies the width of the output field. w's range is 5-11, default 7
+                                                        date5.  15MAR
+                                                        date6.   15MAR
+                                                        date7.  15MAR18
+                                                        date8.   15MAR18
+                                                        date9.  15MAR2018
+                                                        date11. 15-MAR-2018
+DATEAMPMw.d/MDYAMPMw.d                                - w specifies the width of the output field. w's range is 7-40, default 19
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DATETIMEw.d                                           - w specifies the width of the output field. w's range is 7-40, default 16
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DAYw./MONTHw./QTRw./YEARw.                            - 
+DDMMYYw./MMDDYYw/YYMMDDw.                             - Writes date values in the form ddmm<yy>yy or dd/mm/<yy>yy, where a forward slash is the separator and the year appears as either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 2-10, default 8
+DDMMYYxw./MMDDYYxw./YYMMDDxw.                         - Writes date values in the form ddmm<yy>yy or dd-mm-yy<yy>, where the x in the format name is a character that represents the special character that separates the day, month, and year. The special character can be a hyphen (-), period (.), blank character, slash (/), colon (:), or no separator; the year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 2-10, default 8
+                                                        x identifies a separator or specifies that no separator appear between the day, the month, and the year. The following values are valid for x:
+                                                          B separates with a blank
+                                                          C separates with a colon
+                                                          D separates with a hyphen
+                                                          N indicates no separator
+                                                          P separates with a period
+                                                          S separates with a slash.
+*/
+
+/*Informat 
+An informat is a type of SAS language element that applies a pattern to or executes instructions for a data value to be read as input. 
+Types of informats correspond to the data's type: numeric, character, date, time, or timestamp. 
+The ability to create user-defined informats is also supported. 
+eg: we need to read data: $1,000,000 then COMMA11. shoud be used as informat.
+
+Syntax:
+<$>informat<w>.<d>                                    - $: indicates a character format. Its absence indicates a numeric format.
+                                                      - format: names the format. The format is a SAS format or a user-defined format that was previously defined with the VALUE statement in PROC FORMAT.
+                                                      - w: pecifies the format width, which for most formats is the number of columns in the output data.
+                                                      - d: specifies an optional decimal scaling factor in the numeric formats.
+
+Attention Point:
+Even though SAS can read up to 32 digits when you specify some numeric informats, numbers with more than 15 significant digits might lose precision due to the limitations of the eight-byte floating-point representation used by most computers.
+Informats always contain a period (.) as a part of the name. If you omit the w and d values from the informat, SAS uses default values. If the data contain decimal points, SAS ignores the d value and reads the number of decimal places that are actually in the input data.
+If the informat width is too narrow to read all the columns in the input data, you might get unexpected results. 
+When a problem occurs with an informat, SAS writes a note to the SAS log and assigns a missing value to the variable. Problems occur if you use an incompatible informat, such as a numeric informat to read character data, or if you specify the width of a date and time informat that causes SAS to read a special character in the last column.
+
+You can use informats in these ways:
+in a INPUT statement                                  - The INPUT statement with an informat after a variable name is the simplest way to read values into a variable. For example, the following INPUT statement uses two informats:
+                                                        input @15 style $3. @21 price 5.2;
+                                                        The $w. character informat reads values into the variable STYLE. The w.d numeric informat reads values into the variable PRICE.
+with the INPUT, INPUTC, or INPUTN functions           - The INPUT function converts a SAS character expression using a specified informat. INPUT works in compile step while INPUTC and INPUTN work in run time.
+                                                        TempCharacter='98.6';
+                                                        TemperatureNumber=input(TempCharacter,4.);
+                                                        Characater is transformed into numeric.
+in a FORMAT statement in a DATA step or a PROC step   - The INFORMAT statement associates an informat with a variable. 
+                                                        informat Birthdate Interview date9.;
+                                                        input @63 Birthdate Interview;
+in an ATTRIB statement in a DATA step or a PROC step  - The ATTRIB statement can also associate an informat, as well as other attributes, with one or more variables.
+                                                        attrib Birthdate Interview informat=date9.;
+                                                        input @63 Birthdate Interview;
+Common Informat:
+Character	
+$BINARYw./$HEXw./$OCTALw.                             - Converts binary/hexdecimal/octal data to character data.
+$CHARw./$w.                                           - Reads character data with blanks./Reads standard character data.
+$QUOTEw.                                              - Removes matching quotation marks from character data.
+$UPCASEw.                                             - Converts character data to uppercase.
+$VARYINGw.                                            - Reads character data of varying length.
+Date and Time	
+DATEw.                                                - w specifies the width of the output field. w's range is 7-32, default 7
+                                                        date5.  15MAR
+                                                        date6.   15MAR
+                                                        date7.  15MAR18
+                                                        date8.   15MAR18
+                                                        date9.  15MAR2018
+                                                        date11. 15-MAR-2018
+MDYAMPMw.d                                            - Reads datetime values in the form mm-dd-yy<yy> hh:mm:ss.ss AM|PM, where a special character such as a hyphen (-), period (.), slash (/), or colon (:) separates the month, day, and year. The year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 8-40, default 19
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+DATETIMEw.d                                           - Reads datetime values in the form ddmmmyy hh:mm:ss.ss or ddmmmyyyy hh:mm:ss.ss.
+                                                        w specifies the width of the output field. w's range is 13-40, default 18
+                                                        d specifies the number of digits to the right of the decimal point in the seconds value. This argument is optional. d's range is 0–39, must smaller than w.
+YYMMNw./YYQw./MONYYw.                                 - Reads month and year date values in the form yyyymm or yymm / yyQq or yyyyQq / mmmyy or mmmyyyy.
+                                                        w specifies the width of the output field. w's range is 4-32, default 6
+DDMMYYw./MMDDYYw./YYMMDDw.                            - Reads date values in the form ddmmyy or ddmmyyyy / mmddyy or mmddyyyy / yymmdd or yyyymmdd, where a special character, such as a hyphen (-), period (.), or slash (/), separates the day, month, and year; the year can be either 2 or 4 digits.
+                                                        w specifies the width of the output field. w's range is 6-32, default 6
+Numeric	
+BINARYw.d/HEXw./OCTALw.d                              - Converts positive binary/hexadecimal/ positive binary/positive octal values to integers.
+COMMAw.d                                              - Removes embedded characters.
+COMMAXw.d                                             - Removes embedded periods, blanks, dollar signs, percent signs, hyphens, and closing parenthesis from the input data. An open parenthesis at the beginning of a field is converted to a minus sign. The COMMAX informat reverses the roles of the decimal point and the comma.
+FLOATw.d                                              - Reads a native single-precision, floating-point value and divides it by 10 raised to the dth power.
+PERCENTw.d                                            - Reads percentages as numeric values.
+w.d                                                   - Reads standard numeric data.
+*/
+
+/*Functions and Call routines
+A function is a component of the SAS programming language that can accept arguments, perform a computation or other operation, and return a value. 
+Functions return either numeric or character results. 
+The value that is returned can be used in an assignment statement or elsewhere in expressions. 
+Many functions are included with SAS, and you can write your own functions as well. You can use FCMP Procedure in Base SAS Procedures Guide to create customized functions.
+Functions are used in DATA step, in a WHERE expression, in macro language statements, in PROC REPORT, and in Structured Query Language (SQL).
+
+A CALL routine alters variable values or performs other system functions. 
+CALL routines are similar to functions, but differ from functions in that you cannot use them in assignment statements or expressions.
+All SAS CALL routines are invoked with CALL statements. That is, the name of the routine must appear after the keyword CALL in the CALL statement.
+
+Syntax:
+function-name (argument-1<, …argument-n>) - max(cash,credit)
+function-name (OF variable-list) - sum(of x  y  z)
+function-name (<argument | OF variable-list | OF array-name[*]><, <argument | OF variable-list | OF array-name[*]>,...>) - msplint(x0,5,of x1-x5,of y1-y5,-2,2)
+
+CALL routine-name (argument-1<, ...argument-n>); - call prxchange('/old/new',1+k,trim(string),result,length);
+CALL routine-name (OF variable-list); - call cats(inventory, of y1-y15, of z1-z15);
+CALL routine-name (argument-1 | OF variable-list-1 <, ...argument-n | OF variable-list-n>);
+
+If the value of an argument is invalid, SAS writes a note or error message to the log and sets the result to a missing value. 
+Some character functions produce resulting variables, or target variables, with a default length of 200 bytes. 
+Numeric target variables have a default length of 8 bytes. 
+The default target variable lengths may not apply some character functions. These functions obtain the length of the return argument based on the length of the first argument.
+SAS provides functions that return descriptive statistics. SAS calculates descriptive statistics for the nonmissing values of the arguments.
+
+Using DATA Step Functions within Macro Functions
+The macro functions %SYSFUNC and %QSYSFUNC can call most DATA step functions to generate text in the macro facility. 
+%SYSFUNC and %QSYSFUNC have one difference: %QSYSFUNC masks the result of the function and %SYSFUNC does not. %SYSFUNC also works with user-defined functions.
+%sysfunc(date(),worddate.)
+Because %SYSFUNC is a macro function, you do not need to enclose character values in quotation marks as you do in DATA step functions. For example, the arguments to the OPEN function are enclosed in quotation marks when you use the function alone, but the arguments do not require quotation marks when used within %SYSFUNC.
+dsid=open("sasuser.houses","i");
+dsid=open("&mydata","&mode");
+%let dsid=%sysfunc(open(sasuser.houses,i));
+%let dsid=%sysfunc(open(&mydata,&mode));
+
+Using Functions to Manipulate Files
+If you use functions such as FOPEN, FGET, and FCLOSE, you have more opportunity to examine and manipulate your data than when you use statements such as INFILE, INPUT, and PUT.
+When you use external files, the FOPEN function allocates a buffer called the File Data Buffer (FDB) and opens the external file for reading or updating. 
+The FREAD function reads a record from the external file and copies the data into the FDB. 
+The FGET function then moves the data to the DATA step variables. 
+The function returns a value that you can check with statements or other functions in the DATA step to determine how to further process your data. 
+After the records are processed, the FWRITE function writes the contents of the FDB to the external file, and the FCLOSE function closes the file.
+
+Most commonly used functions:
+CALL SYMPUTX (macro-variable, value <, symbol-table>);
+                                                      - Assigns a value to a macro variable, and removes both leading and trailing blanks.
+CALL SYMPUT CALL SYMPUT(argument-1, argument-2);
+                                                      - Assigns DATA step information to a macro variable.
+CATS (item-1 <, …, item-n>)
+                                                      - Removes leading and trailing blanks, and returns a concatenated character string.
+CATX (delimiter, item-1 <, ... item-n>)
+                                                      - Removes leading and trailing blanks, inserts delimiters, and returns a concatenated character string.
+COMPRESS (source <, characters> <, modifier(s)>)
+                                                      - Returns a character string with specified characters removed from the original string.
+COUNTW (<string> <, <character(s)> <, <modifier(s)>>>)
+                                                      - Counts the number of words in a character string.
+DATEPART (datetime)                                   - Extracts the date from a SAS datetime value.
+DOSUBL (x), CALL EXECUTE (x)                          - Imports macro variables from the calling environment, and exports macro variables back to the calling environment.
+EXIST (member-name <, member-type <, generation>>)    - Verifies the existence of a SAS library member.
+FILEEXIST (file-name)                                 - Verifies the existence of an external file by its physical name.
+INDEX (source, excerpt)                               - Searches a character expression for a string of characters, and returns the position of the string's first character for the first occurrence of the string.
+INPUT (source, <? | ??> informat.)                    - Returns the value that is produced when SAS converts an expression by using the specified informat.
+INTCK(interval <multiple> <.shift-index>, start-date, end-date, <'method'>)
+                                                      - Returns the number of interval boundaries of a given kind that lie between two dates, times, or datetime values.
+INTNX (interval <multiple><.shift-index>, start-from, increment <, 'alignment'>)
+                                                      - Increments a date, time, or datetime value by a given time interval, and returns a date, time, or datetime value.
+LAG <n> (argument)                                    - Returns values from a queue.
+LENGTH (string)                                       - Returns the length of a non-blank character string, excluding trailing blanks, and returns 1 for a blank character string.
+PUT (source, format.)                                 - Returns a value using a specified format.
+ROUND (argument <, rounding-unit>)                    - Rounds the first argument to the nearest multiple of the second argument, or to the nearest integer when the second argument is omitted.
+SCAN (string, count <, character-list <, modifier>>)
+                                                      - Returns the nth word from a character string.
+STRIP (string)                                        - Returns a character string with all leading and trailing blanks removed.
+SUBSTR (left of =) Function                           - Replaces character value contents.
+SUBSTR (right of =) Function                          - Extracts a substring from an argument.
+SUM (argument-1 <, argument-2, ...>)                  - Returns the sum of the nonmissing arguments.
+TIME ()                                               - Returns the current time of day as a numeric SAS time value.
+TIMEPART (datetime)                                   - Extracts a time value from a SAS datetime value.
+TRANWRD (source, target, replacement)                 - Replaces all occurrences of a substring in a character string.
+TRANSLATE (source, to-1, from-1 <, ...to-n, from-n>)  - Replaces specific characters in a character expression.
+                                                        x=translate('XYZW', 'AB', 'VW');  /*x=XYZB*/                                                                                                                                                                                                                    
+                                                        y=translate('AABBAABABB','12','AB');  /*y=1122112122*/
+TODAY ()                                              - Returns the current date as a numeric SAS date value.
+ZIPCITYDISTANCE (ZIP-code-1, ZIP-code-2)              - Returns the geodetic distance between two ZIP code locations in the United States of America.
+CMISS (argument-1 <, argument-2,…>)                   - Counts the number of missing arguments.
+MISSING (numeric-expression | character-expression)   - Returns a numeric result that indicates whether the argument contains a missing value.
+N (argument-1 <, ... argument-n>)                     - Returns the number of nonmissing numeric values.
+NMISS (argument-1 <,... argument-n>)                  - Returns the number of missing numeric values.
+                                                        NMISS requires numeric values, whereas CMISS works with both numeric and character values. NMISS works with multiple numeric values, whereas MISSING works with only one value that can be either numeric or character.
+*/
+
+/*SAS Data Step Statement
+A SAS statement is a string of SAS keywords, SAS names, special characters, and operators that instructs SAS to perform an operation or that gives information to SAS. 
+Each SAS statement ends with a semicolon.
+
+DATA step statements are executable or declarative statements that can appear in the DATA step and run in SAS. 
+Executable statements result in some action during individual iterations of the DATA step. 
+Declarative statements supply information to SAS and take effect when the system compiles program statements.
+
+Main DATA Statements(which is declarative):
+DATA <data-set-name-1 <(data-set-options-1)> > <...data-set-name-n <(data-set-options-n)> > </ <DEBUG> <NESTING> <STACK=stack-size> > <NOLIST>;
+                                                      - DATA statement for creating output data sets
+                                                        DEBUG: enables you to debug your program interactively by helping identify logic errors, and sometimes data errors.
+                                                        NESTING: specifies that a note is printed to the SAS log for the beginning and end of each DO-END and SELECT-END nesting level. This option enables you to debug mismatched DO-END and SELECT-END statements and is particularly useful in large programs where the nesting level is not obvious.
+                                                        STACK=stack-size: specifies the maximum number of nested LINK statements.
+                                                        NOLIST: suppresses the output of all variables to the SAS log when the value of _ERROR_ is 1
+DATA view-name <data-set-name-1 <(data-set-options-1)> > <...data-set-name-n <(data-set-options-n)> > / VIEW=view-name <(<password-option> <SOURCE=source-option> )> <NESTING> <NOLIST>;                                                     
+                                                      - DATA statement for creating a DATA step view
+DATA data-set-name / PGM=program-name <(<password-option> <SOURCE=source-option> )> <NESTING> <NOLIST>;        
+                                                      - DATA statement for creating a stored compiled DATA step program
+DATA PGM=program-name <(password-option)> <NOLIST>;
+<DESCRIBE;>
+<REDIRECT INPUT | OUTPUT old-name-1 = new-name-1<… old-name-n = new-name-n> ;>
+<EXECUTE;>                                                      
+                                                      - DATA statement for use with a stored compiled DATA step program                                                      
+
+Executable Statements
+variable=expression;                                  - Assignment. Evaluates an expression and stores the result in a variable.
+                                                        a = 1+1;
+CALL routine(parameter-1 <, ...parameter-n>);         - Invokes a SAS CALL routine
+                                                        CALL SYMPUTX(macro1, x);
+CONTINUE                                              - Stops processing the current DO-loop iteration and resumes processing the next iteration.
+                                                        do i=1 to 5;
+                                                          input name $ idno status $;
+                                                          if status='PT' then continue;
+                                                          input benefits $10.;
+                                                          output;
+                                                        end;
+DELETE                                                - Stops processing the current observation.
+                                                        When DELETE executes, the current observation is not written to a data set, and SAS returns immediately to the beginning of the DATA step for the next iteration.
+DO;Statements;END;                                    - Specifies a group of statements to be executed as a unit.
+DO;index-variable=specification-1 <, ...specification-n>;Statements;END; 
+                                                      - Iterative. Executes statements between the DO and END statements repetitively, based on the value of an index variable.
+                                                        do month='JAN','FEB','MAR';
+                                                        do count=2,3,5,7,11,13,17;
+                                                        do i=1 to 10;
+                                                        do i=1 to k-1, k+1 to n;
+                                                        do i=.1 to .9 by .1, 1 to 10 by 1,20 to 100 by 10;
+                                                        do i=1 to 10 while(x<y);
+                                                        do i=2 to 20 by 2 until((x/3)>y);
+                                                        do i=10 to 0 by -1 while(month='JAN');
+DO UNTIL(expression);Statements;END;                  - Executes statements in a DO loop repetitively until a condition is true.
+                                                        do until(n>=5);
+                                                          put n=;
+                                                          n+1;
+                                                        end;
+DO WHILE(expression);Statements;END;                  - Executes statements in a DO-loop repetitively while a condition is true.
+                                                        do while(n<5);
+                                                          put n=;
+                                                          n+1;
+                                                        end;
+ERROR <message>;                                      - Sets _ERROR_ to 1. A message written to the SAS log is optional.
+                                                        if type='teen' & age > 19 then
+                                                        error 'type and age don"t match ' age=;
+                                                        above is equivalent to 
+                                                        if type='teen' & age > 19 then
+                                                        do;
+                                                          file log;
+                                                          put 'type and age don"t match ' age=;
+                                                          _error_=1;
+                                                          file file-specification;
+                                                        end;
+FILE file-specification <device-type> <options> <operating-environment-options>;
+                                                      - Specifies the current output file for PUT statements.
+                                                        file-specification:
+                                                          'external-file': specifies the physical name of an external file, which is enclosed in quotation marks.
+                                                          fileref: specifies the fileref of an external file. You must have associated fileref with an external file in a FILENAME statement or function in a previous step or in an appropriate operating environment command.
+                                                          LOG: is a reserved fileref that directs the output that is produced by any PUT statements to the SAS log. Because output lines are by default written to the SAS log, use a FILE LOG statement to restore the default action or to specify additional FILE statement options.
+                                                          PRINT: is a reserved fileref that directs the output that is produced by any PUT statements to the same file as the output that is produced by SAS procedures.
+                                                        device-type: specifies the type of device or the access method that is used if the fileref points to an input or output device or a location that is not a physical file. see documentation for details.                                                          
+                                                        Options:
+                                                          BLKSIZE=block-size: specifies the block size of the output file
+                                                          COLUMN=variable: specifies a variable that SAS automatically sets to the current column location of the pointer. This variable, like automatic variables, is not written to the data set.
+                                                          DELIMITER= delimiter(s): specifies an alternate delimiter (other than blank) to be used for LIST output, where delimiter can be one of these items:
+                                                          FILENAME=variable: defines a character variable, whose name you supply, that SAS sets to the value of the physical name of the file currently open for PUT statement output. 
+                                                          FILEVAR=variable: defines a variable whose change in value causes the FILE statement to close the current output file and open a new one the next time the FILE statement executes. The next PUT statement that executes writes to the new file that is specified as the value of the FILEVAR= variable.
+                                                          FOOTNOTES | NOFOOTNOTES: controls whether currently defined footnotes are printed.
+                                                          HEADER=label: defines a statement label that identifies a group of SAS statements that you want to execute each time SAS begins a new output page.
+                                                          LINE=variable: defines a variable whose value is the current relative line number within the group of lines available to the output pointer.
+                                                          LINESIZE=line-size: sets the maximum number of columns per line for reports and the maximum record length for data files.
+                                                          LINESLEFT=variable: defines a variable whose value is the number of lines left on the current page. 
+                                                          N=available-lines: specifies the number of lines that you want available to the output pointer in the current iteration of the DATA step. 
+                                                          OLD: replaces the previous contents of the file.
+                                                          ODS < = (ODS-suboptions) >: specifies to use the Output Delivery System to format the output from a DATA step. 
+                                                          PRINT | NOPRINT: controls whether carriage-control characters are placed in the output lines.
+                                                        Operating Environment Options: For descriptions of operating-environment-specific options in the FILE statement, see the SAS documentation for your operating environment.
+GO TO label                                           - Directs program execution immediately to the statement label that is specified and, if followed by a RETURN statement, returns execution to the beginning of the DATA step.
+                                                        label: specifies a statement label that identifies the GO TO destination. The destination must be within the same DATA step. You must specify the label argument.
+                                                          data info;   
+                                                            input x;
+                                                            if 1<=x<=5 then go to add;
+                                                            put x=;
+                                                            return;    /* SUM statement not executed if x<1 or x>5 */
+                                                            add: sumx+x;
+                                                            datalines;
+                                                            7
+                                                            6
+                                                            323
+                                                            ;
+                                                          run;
+IF expression;                                        - Continues processing only those observations that meet the condition of the specified expression.
+                                                        If the expression is true for the observation or record (its value is neither 0 nor missing), SAS continues to execute statements in the DATA step and includes the current observation in the data set. 
+                                                        The resulting SAS data set or data sets contain a subset of the original external file or SAS data set.
+                                                        If the expression is false (its value is 0 or missing), no further statements are processed for that observation or record, the current observation is not written to the data set, and the remaining program statements in the DATA step are not executed. 
+                                                        SAS immediately returns to the beginning of the DATA step because the subsetting IF statement does not require additional statements to stop processing observations.
+IF expression THEN statement; <ELSE statement;>       - Using IF-THEN statements without the ELSE statement causes SAS to evaluate all IF-THEN statements. Using IF-THEN statements with the ELSE statement causes SAS to execute IF-THEN statements until it encounters the first true statement. Subsequent IF-THEN statements are not evaluated.
+INFILE file-specification <device-type> <options> <operating-environment-options>;
+                                                      - Specifies an external file to read with an INPUT statement.
+                                                        data scores;
+                                                          infile datalines delimiter=',';
+                                                          input test1 test2 test3;
+                                                          datalines;
+                                                          91,87,95
+                                                          97,,92
+                                                          ,1,1
+                                                          ;
+                                                        run;
+                                                        Please refer documentation if missing treatment is required.
+INPUT <specification(s)> <@ | @@>;                    - Describes the arrangement of values in the input data record and assigns input values to the corresponding SAS variables.
+                                                        specification(s):
+                                                        variable
+                                                        variable-list
+                                                        $: Character
+                                                        &: keep one blank. This format modifier reads the value from the next non-blank column until the pointer reaches two consecutive blanks, the defined length of the variable, or the end of the input line, whichever comes first.
+                                                        pointer-control
+                                                        column-specifications
+                                                        format-modifier
+                                                        informat.
+                                                        @: holds an input record for the execution of the next INPUT statement within the same iteration of the DATA step. This line-hold specifier is called trailing @.
+                                                        @@: holds the input record for the execution of the next INPUT statement across iterations of the DATA step. This line-hold specifier is called double trailing @.
+                                                        @n: moves the pointer to column n
+                                                        #n: moves the pointer to record n.
+                                                        INPUT, Column: input name $ 1-10 pulse 11-13 waist 14-15 gender $ 16;
+                                                        INPUT, Formatted: input (name score1-score5) ($10. 5*4.);
+                                                        INPUT, List: input Name $ Score1-Score3 Team $ Final_Date:MMDDYY10.;
+                                                        INPUT, Named: input id name= gender= age= dob=;
+                                                                      datalines;
+                                                                      4798 name=COLIN gender=m age=23 dob=16/02/75
+                                                                      2653 name=MICHELE gender=f age=46 dob=17/02/73
+                                                                      ;
+LEAVE                                                 - Stops processing the current loop and resumes with the next statement in the sequence.
+                                                        do year= start_yr to 1991;
+                                                          if bonus ge 500 then leave;
+                                                          bonus+50;
+                                                        end;
+LINK                                                  - Directs program execution immediately to the statement label that is specified and, if followed by a RETURN statement, returns execution to the statement that follows the LINK statement.
+                                                        data hydro;
+                                                          input type $ depth station $;
+                                                          if type ='aluv' then link calcu; /* link to label calcu: */
+                                                          date=today();
+                                                          return; /* return to top of step */                         
+                                                          calcu: if station='site_1' 
+                                                                 then elevatn=6650-depth;
+                                                                 else if station='site_2' 
+                                                                 then elevatn=5500-depth; 
+                                                                 return; /* return to date=today(); */                          
+                                                          datalines;
+                                                          aluv 523 site_1
+                                                          uppa 234 site_2
+                                                          aluv 666 site_2
+                                                          ;  
+                                                        run;
+LIST                                                  - Writes to the SAS log the input data record for the observation that is being processed.
+MERGE AS-data-set-1 <(data-set-options)> SAS-data-set-2 <(data-set-options) > <...SAS-data-set-n <(data-set-options)> > <END=variable>;
+                                                      - Joins observations from two or more SAS data sets into a single observation.
+                                                          END=variable: names and creates a temporary variable that contains an end-of-file indicator.
+OUTPUT <data-set-name(s)>;                            - Writes the current observation to a SAS data set.
+                                                        Once you use an OUTPUT statement to write an observation to any one data set, however, there is no implicit OUTPUT statement at the end of the DATA step. 
+PUT <specification(s)> <_ODS_> <@ | @@>;              - Writes lines to the SAS log, to the SAS output window, or to an external location that is specified in the most recent FILE statement.
+                                                        PUT, Column: put name 1-10 gender 16;
+                                                        PUT, Formatted: put (grades1-grades5) (3*7.2, 2*5.2);
+                                                        PUT, List: put 'Week of ' date ~ worddate15. salesrep ~ $12. 'sales were ' tot ~ dollar9.  + (-1) '.';
+                                                        PUT, Named: put name = @20 score1= score3= ;
+PUTLOG ' message'                                     - Writes a message to the SAS log.
+RETURN                                                - The RETURN statement causes execution to stop at the current point in the DATA step, and returns control to a previous DATA step statement.
+SELECT <(select-expression)> ;
+  WHEN (when-expression-1 <..., when-expression-n> ) statement;
+  <... WHEN (when-expression-1 <...,when-expression-n> ) statement;>
+  < OTHERWISE statement;>
+END;                                                  - Executes one of several statements or groups of statements.
+                                                        select (a);
+                                                        when (1) x=x*10;
+                                                        when (2);
+                                                        when (3,4,5) x=x*100;
+                                                        otherwise;
+                                                        end;
+SET                                                   - Reads an observation from one or more SAS data sets.
+STOP                                                  - Stops execution of the current DATA step and resume processing statements after the end of the current DATA step.
+variable+expression;                                  - Sum
+                                                        retain variable 0;
+                                                        variable=sum(variable,expression);
+
+Declarative Statements
+ARRAY array-name { subscript } <$ length | length | VARCHAR(length) | VARCHAR(*)> <array-elements> <(initial-value-list)>;
+                                                      - Defines the elements of an array.
+                                                        Arrays in the SAS language are different from arrays in many other languages. 
+                                                        A SAS array is simply a convenient way of temporarily identifying a group of variables. 
+                                                        It is not a data structure, and array-name is not a variable.
+                                                        eg:
+                                                        array rain {5} janr febr marr aprr mayr;
+                                                        array days{7} d1-d7;
+                                                        array month{*} jan feb jul oct nov;
+                                                        array x{*} _NUMERIC_;
+                                                        array test{4} t1 t2 t3 t4 (90 80 70 70);
+                                                        array test{4} t1-t4 (90 80 2*70);
+                                                        array test{4} _TEMPORARY_ (90 80 70 70);
+                                                        array test2{*} $ a1 a2 a3 ('a','b','c');
+                                                        array new{2:5} green jacobs denato fetzer;
+                                                        array x{5,3} score1-score15;
+                                                        array test{3:4,3:7} test1-test10;
+                                                        array temp{0:999} _TEMPORARY_;
+                                                        array x{10} (2*1:5);
+                                                        then we can use x{i} to replace the variable used in anywhere.
+DATALINES,CARDS, DATALINES4,CARDS4                    - Specifies that data lines follow./ Indicates that data lines that contain semicolons follow.
+                                                        datalines; /* use ; to tell the end of dataline*/
+                                                        John Sales
+                                                        Mary Acctng
+                                                        ;
+                                                        datalines4;/* use ;;;; to tell the end of dataline*/
+                                                          KIRK, 1988 
+                                                        2  LIN ET AL., 1995; BRADY, 1993
+                                                        3  BERG, 1990; ROA, 1994; WILLIAMS, 1992
+                                                        ;;;;
+labels: Statements                                    - Identifies a statement that is referred to by another statement.
+                                                        reorder: input Supplier $;
+LABEL variable-1=label-1<...variable-n=label-n>;      - Assigns descriptive labels to variables 
+ATTRIB variable-list(s) attribute-list(s);            - Associates a format, informat, label, and length with one or more variables.
+DROP variable-list;                                   - Excludes variables from output SAS data sets.
+KEEP variable-list;                                   - Specifies the variables to include in output SAS data sets.
+LENGTH variable-specification(s) <DEFAULT=n>;         - Specifies the number of bytes for storing character and numeric variables, or the number of characters for storing VARCHAR variables.
+BY <DESCENDING> variable-1 <...<DESCENDING> variable-n> <NOTSORTED> <GROUPFORMAT>;
+                                                      - Controls the operation of a SET, MERGE, MODIFY, or UPDATE statement in the DATA step and sets up special grouping variables.
+                                                        DESCENDING: specifies that the data sets are sorted in descending order by the variable that is specified. 
+                                                        GROUPFORMAT: uses the formatted values, instead of the internal values, of the BY variables to determine where BY groups begin and end, and therefore how FIRST.variable and LAST.variable are assigned. 
+                                                                     Although the GROUPFORMAT option can appear anywhere in the BY statement, the option applies to all variables in the BY statement.
+                                                        NOTSORTED: specifies that observations with the same BY value are grouped together but are not necessarily sorted in alphabetical or numeric order.
+                                                        
+                                                        SAS identifies the beginning and end of a BY group by creating two temporary variables for each BY variable: FIRST.variable and LAST.variable. 
+                                                        The value of these variables is either 0 or 1. 
+                                                        SAS sets the value of FIRST.variable to 1 when it reads the first observation in a BY group, and sets the value of LAST.variable to 1 when it reads the last observation in a BY group. 
+                                                        These temporary variables are available for DATA step programming but are not added to the output data set.
+                                                        The data sets that are listed in the SET, MERGE, or UPDATE statements must be sorted by the values of the variables that are listed in the BY statement or have an appropriate index. 
+END                                                   - Ends a DO group or SELECT group processing.
+RENAME old-name-1=new-name-1 <...old-name-n=new-name-n>;
+                                                      - Specifies new names for variables in output SAS data sets.
+FORMAT variable-1 <...variable-n> format <DEFAULT=default-format>;
+                                                      - Associates formats with variables.
+INFORMAT <variable-1> <… variable-n> <DEFAULT=default-informat>;
+                                                      - Associates informats with variables.
+RETAIN <element-list(s) <initial-value(s) | (initial-value-1) | (initial-value-list-1)> <... element-list-n <initial-value-n | (initial-value-n ) | (initial-value-list-n)> >> ;
+                                                      - Causes a variable that is created by an INPUT or assignment statement to retain its value from one iteration of the DATA step to the next.
+                                                        retain month1-month5;
+                                                        retain month1-month5 1 year 0 a b c 'XYZ';
+                                                        retain month1-month5 (1);
+                                                        retain _all_;
+                                                        retain var1-var4 (1 2 3 4);
+                                                        retain var1-var4 (1,2,3,4);
+                                                        retain var1-var4(1:4);
+WHERE where-expression-1 < logical-operator where-expression-n>;
+                                                      - Selects observations from SAS data sets that meet a particular condition.
+                                                        Using the WHERE statement might improve the efficiency of your SAS programs because SAS is not required to read all observations from the input data set.                                  -
+*/
+
+/*Operator
+Operator Type       Symbol or Mnemonic        Description
+Arithmetic
+                    *                         multiplication
+                    /                         division
+                    +                         addition
+                    −                         subtraction
+                    **                        exponentiation
+Comparison
+                    = or EQ                   equal to
+                    ^=, ¬=, ~=, or NE1        not equal to
+                    > or GT                   greater than
+                    < or LT                   less than
+                    >= or GE                  greater than or equal to
+                    <= or LE                  less than or equal to
+                    IN                        equal to one of a list
+Logical (Boolean)         
+                    & or AND                  logical and
+                    | or OR                   logical or
+                    ~,^ , ¬, or NOT           logical not
+Other                      
+                    ||                        concatenation of character variables
+                    ( )                       indicate order of evaluation
+                    + prefix                  positive number
+                    − prefix                  negative number
+WHERE Expression Only
+                    BETWEEN–AND               an inclusive range
+                    ? or CONTAINS             a character string
+                    IS NULL or IS MISSING     missing values
+                    LIKE                      match patterns
+                    =*                        sounds-like
+                    SAME-AND                  add clauses to an existing WHERE statement without retyping original one
+*/
+
+/*Utility
+%DS2CSV(argument-1=value-1, argument-2=value-2 <,argument-3=value-3 ...>)
+                                                      - Converts SAS data sets to comma-separated value (CSV) files.
+                                                        colhead=Y | N: indicates whether to include column headings in the CSV file. The column headings that are used depend on the setting of the LABELS argument. By default, column headings are included as the first record of the CSV file.
+                                                        data=SAS-data-set-name: specifies the SAS data set that contains the data that you want to convert into a CSV file. This argument is required. However, if you omit the data set name, DS2CSV attempts to use the most recently created SAS data set.
+                                                        formats=Y | N: indicates whether to apply the data set's defined variable formats to the values in the CSV file. By default, all formats are applied to values before they are added to the CSV file. The formats must be stored in the data set in order for them to be applied.
+                                                        labels=Y | N: indicates whether to use the SAS variable labels that are defined in the data set as your column headings. The DS2CSV macro uses the variable labels by default. If a variable does not have a SAS label, then use the name of the variable. Specify labels=N to use variable names instead of the SAS labels as your column headings.
+                                                        pw=password: specifies the password that is needed to access a password-protected data set. This argument is required if the data set has a READ or PW password. (You do not need to specify this argument if the data set has only WRITE or ALTER passwords.)
+                                                        sepchar=separator-character: specifies the character that is used for the separator character. Specify the two-character hexadecimal code for the character or omit this argument to get the default setting. The default settings are 2C for ASCII systems and 6B for EBCDIC systems. (These settings represent commas (,) on their respective systems.)
+                                                        var=var1 var2 ...: specifies the variables that are to be included in the CSV file and the order in which they should be included. To include all of the variables in the data set, do not specify this argument. If you want to include only a subset of the variables, then list each variable name and use single blank spaces to separate the variables. Do not use a comma in the list of variable names.
+                                                                           Restriction	A range of values is not valid. For example, var1–var4.
+                                                        where=where-expression: specifies a valid WHERE clause that selects observations from the SAS data set. Using this argument subsets your data based on the criteria that you supply for where-expression.
+                                                        
+                                                        %ds2csv (data=sashelp.retail, runmode=b, csvfile=c:\temp\retail.csv);
+*/
+                                                           
