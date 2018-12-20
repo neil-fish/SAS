@@ -16,7 +16,6 @@ I = put(E,COMMA8.2); *char;
 RUN;
 */
 
-
 /*
 Automatic Data Step Variable
 SAS dataset has these veriabls in the data step: 
@@ -483,25 +482,73 @@ IF expression;                                        - Continues processing onl
                                                         If the expression is false (its value is 0 or missing), no further statements are processed for that observation or record, the current observation is not written to the data set, and the remaining program statements in the DATA step are not executed. 
                                                         SAS immediately returns to the beginning of the DATA step because the subsetting IF statement does not require additional statements to stop processing observations.
 IF expression THEN statement; <ELSE statement;>       - Using IF-THEN statements without the ELSE statement causes SAS to evaluate all IF-THEN statements. Using IF-THEN statements with the ELSE statement causes SAS to execute IF-THEN statements until it encounters the first true statement. Subsequent IF-THEN statements are not evaluated.
-INFILE
-INPUT
-INPUT, Column
-INPUT, Formatted
-INPUT, List
-INPUT, Named
-LEAVE
-LINK
+INFILE file-specification <device-type> <options> <operating-environment-options>;
+                                                      - Specifies an external file to read with an INPUT statement.
+                                                        data scores;
+                                                          infile datalines delimiter=',';
+                                                          input test1 test2 test3;
+                                                          datalines;
+                                                          91,87,95
+                                                          97,,92
+                                                          ,1,1
+                                                          ;
+                                                        run;
+                                                        Please refer documentation if missing treatment is required.
+INPUT <specification(s)> <@ | @@>;                    - Describes the arrangement of values in the input data record and assigns input values to the corresponding SAS variables.
+                                                        specification(s):
+                                                        variable
+                                                        variable-list
+                                                        $: Character
+                                                        &: keep one blank. This format modifier reads the value from the next non-blank column until the pointer reaches two consecutive blanks, the defined length of the variable, or the end of the input line, whichever comes first.
+                                                        pointer-control
+                                                        column-specifications
+                                                        format-modifier
+                                                        informat.
+                                                        @: holds an input record for the execution of the next INPUT statement within the same iteration of the DATA step. This line-hold specifier is called trailing @.
+                                                        @@: holds the input record for the execution of the next INPUT statement across iterations of the DATA step. This line-hold specifier is called double trailing @.
+                                                        @n: moves the pointer to column n
+                                                        #n: moves the pointer to record n.
+                                                        INPUT, Column: input name $ 1-10 pulse 11-13 waist 14-15 gender $ 16;
+                                                        INPUT, Formatted: input (name score1-score5) ($10. 5*4.);
+                                                        INPUT, List: input Name $ Score1-Score3 Team $ Final_Date:MMDDYY10.;
+                                                        INPUT, Named: input id name= gender= age= dob=;
+                                                                      datalines;
+                                                                      4798 name=COLIN gender=m age=23 dob=16/02/75
+                                                                      2653 name=MICHELE gender=f age=46 dob=17/02/73
+                                                                      ;
+LEAVE                                                 - Stops processing the current loop and resumes with the next statement in the sequence.
+                                                        do year= start_yr to 1991;
+                                                          if bonus ge 500 then leave;
+                                                          bonus+50;
+                                                        end;
+LINK                                                  - Directs program execution immediately to the statement label that is specified and, if followed by a RETURN statement, returns execution to the statement that follows the LINK statement.
+                                                        data hydro;
+                                                          input type $ depth station $;
+                                                          if type ='aluv' then link calcu; /* link to label calcu: */
+                                                          date=today();
+                                                          return; /* return to top of step */                         
+                                                          calcu: if station='site_1' 
+                                                                 then elevatn=6650-depth;
+                                                                 else if station='site_2' 
+                                                                 then elevatn=5500-depth; 
+                                                                 return; /* return to date=today(); */                          
+                                                          datalines;
+                                                          aluv 523 site_1
+                                                          uppa 234 site_2
+                                                          aluv 666 site_2
+                                                          ;  
+                                                        run;
 LIST
 LOSTCARD
 MERGE
 MODIFY
 Null
 OUTPUT
+PUT
 PUT, Column
 PUT, Formatted
 PUT, List
 PUT, Named
-PUT
 PUT, ODS
 PUTLOG
 REDIRECT
