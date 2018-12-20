@@ -439,10 +439,49 @@ ERROR <message>;                                      - Sets _ERROR_ to 1. A mes
                                                           _error_=1;
                                                           file file-specification;
                                                         end;
-FILE
-FILE, ODS
-GO TO
-IF, Subsetting
+FILE file-specification <device-type> <options> <operating-environment-options>;
+                                                      - Specifies the current output file for PUT statements.
+                                                        file-specification:
+                                                          'external-file': specifies the physical name of an external file, which is enclosed in quotation marks.
+                                                          fileref: specifies the fileref of an external file. You must have associated fileref with an external file in a FILENAME statement or function in a previous step or in an appropriate operating environment command.
+                                                          LOG: is a reserved fileref that directs the output that is produced by any PUT statements to the SAS log. Because output lines are by default written to the SAS log, use a FILE LOG statement to restore the default action or to specify additional FILE statement options.
+                                                          PRINT: is a reserved fileref that directs the output that is produced by any PUT statements to the same file as the output that is produced by SAS procedures.
+                                                        device-type: specifies the type of device or the access method that is used if the fileref points to an input or output device or a location that is not a physical file. see documentation for details.                                                          
+                                                        Options:
+                                                          BLKSIZE=block-size: specifies the block size of the output file
+                                                          COLUMN=variable: specifies a variable that SAS automatically sets to the current column location of the pointer. This variable, like automatic variables, is not written to the data set.
+                                                          DELIMITER= delimiter(s): specifies an alternate delimiter (other than blank) to be used for LIST output, where delimiter can be one of these items:
+                                                          FILENAME=variable: defines a character variable, whose name you supply, that SAS sets to the value of the physical name of the file currently open for PUT statement output. 
+                                                          FILEVAR=variable: defines a variable whose change in value causes the FILE statement to close the current output file and open a new one the next time the FILE statement executes. The next PUT statement that executes writes to the new file that is specified as the value of the FILEVAR= variable.
+                                                          FOOTNOTES | NOFOOTNOTES: controls whether currently defined footnotes are printed.
+                                                          HEADER=label: defines a statement label that identifies a group of SAS statements that you want to execute each time SAS begins a new output page.
+                                                          LINE=variable: defines a variable whose value is the current relative line number within the group of lines available to the output pointer.
+                                                          LINESIZE=line-size: sets the maximum number of columns per line for reports and the maximum record length for data files.
+                                                          LINESLEFT=variable: defines a variable whose value is the number of lines left on the current page. 
+                                                          N=available-lines: specifies the number of lines that you want available to the output pointer in the current iteration of the DATA step. 
+                                                          OLD: replaces the previous contents of the file.
+                                                          ODS < = (ODS-suboptions) >: specifies to use the Output Delivery System to format the output from a DATA step. 
+                                                          PRINT | NOPRINT: controls whether carriage-control characters are placed in the output lines.
+                                                        Operating Environment Options: For descriptions of operating-environment-specific options in the FILE statement, see the SAS documentation for your operating environment.
+GO TO label                                           - Directs program execution immediately to the statement label that is specified and, if followed by a RETURN statement, returns execution to the beginning of the DATA step.
+                                                        label: specifies a statement label that identifies the GO TO destination. The destination must be within the same DATA step. You must specify the label argument.
+                                                          data info;   
+                                                            input x;
+                                                            if 1<=x<=5 then go to add;
+                                                            put x=;
+                                                            return;    /* SUM statement not executed if x<1 or x>5 */
+                                                            add: sumx+x;
+                                                            datalines;
+                                                            7
+                                                            6
+                                                            323
+                                                            ;
+                                                          run;
+IF expression;                                        - Continues processing only those observations that meet the condition of the specified expression.
+                                                        If the expression is true for the observation or record (its value is neither 0 nor missing), SAS continues to execute statements in the DATA step and includes the current observation in the data set. 
+                                                        The resulting SAS data set or data sets contain a subset of the original external file or SAS data set.
+                                                        If the expression is false (its value is 0 or missing), no further statements are processed for that observation or record, the current observation is not written to the data set, and the remaining program statements in the DATA step are not executed. 
+                                                        SAS immediately returns to the beginning of the DATA step because the subsetting IF statement does not require additional statements to stop processing observations.
 IF expression THEN statement; <ELSE statement;>       - Using IF-THEN statements without the ELSE statement causes SAS to evaluate all IF-THEN statements. Using IF-THEN statements with the ELSE statement causes SAS to execute IF-THEN statements until it encounters the first true statement. Subsequent IF-THEN statements are not evaluated.
 INFILE
 INPUT
