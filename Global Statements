@@ -1,49 +1,112 @@
 Global Statement
 
+/*
+filename sales 'your-input-file';
+libname allmine (v9 v6 'some-filename');
+%include 'MYFILE';
+*/
+
 A SAS global statement is a string of SAS keywords, SAS names, special characters, and operators that instructs SAS to perform an operation or that gives information to SAS. 
 Each SAS global statement ends with a semicolon and can be used anywhere in a SAS program.
 Global statements are not executable; they take effect as soon as SAS compiles program statements.
 
 Data Access: Associates reference names with SAS libraries, SAS catalogs, external files and output devices, and accesses remote files.	
 FILENAME Statement	                              - Associates a SAS fileref with an external file or an output device, disassociates a fileref and external file, or lists attributes of external files.
-FILENAME Statement, CATALOG                       - Access Method	Enables you to reference a SAS catalog as an external file.
-FILENAME Statement, CLIPBOARD                     - Access Method	Enables you to read text data from and write text data to the clipboard on the host computer.
-FILENAME Statement, DATAURL                       - Access Method	Enables you to read data from user-specified text.
-FILENAME Statement, EMAIL (SMTP)                  - Access Method	Enables you to send electronic mail programmatically from SAS using the SMTP (Simple Mail Transfer Protocol) email interface.
-FILENAME Statement, FILESRVC Access Method	      - Enables you to store and retrieve user content using the SAS Viya Files service.
-FILENAME Statement, FTP Access Method	            - Enables you to access remote files by using the FTP protocol.
-FILENAME Statement, Hadoop Access Method	        - Enables you to access files on a Hadoop Distributed File System (HDFS) whose location is specified in a configuration file.
-FILENAME Statement, SFTP Access Method	          - Enables you to access remote files by using the SFTP protocol.
-FILENAME Statement, SOCKET Access Method	        - Enables you to read from or write to a TCP/IP socket.
-FILENAME Statement, URL Access Method	            - Enables you to access remote files by using the URL access method.
-FILENAME Statement, WebDAV Access Method	        - Enables you to access remote files by using the WebDAV protocol.
-FILENAME Statement, ZIP Access Method	            - Enables you to access ZIP files.
+FILENAME fileref <device-type> 'external-file' <ENCODING='encoding-value'> <options> <operating-environment-options>;
+FILENAME fileref <device-type> <options> <operating-environment-options >;
+FILENAME fileref CLEAR | _ALL_ CLEAR;
+FILENAME fileref LIST | _ALL_ LIST ;
+fileref: 1 to 8 bytes
+
+eg:
+filename sales 'your-input-file';
+data jansales;
+    infile sales;  /* specifying a fileref */  
+    input salesrep $20. +6 jansales febsales marsales;
+run;
+
+filename extfile 'external-file' encoding="utf-8"; 
+data myfiles.unicode;
+   infile extfile;
+   input Make $ Model $ Year;
+run;
+
 LIBNAME Statement	                                - Associates or disassociates a SAS library with a libref (a shortcut name), clears one or all librefs, lists the characteristics of a SAS library, concatenates SAS libraries, or concatenates SAS catalogs.
-LIBNAME Statement, CVP Engine	                    - Associates a libref for the character variable padding (CVP) engine to expand character variable lengths so that character data truncation does not occur when a file requires transcoding.
-LIBNAME Statement, JMP Engine	                    - Associates a libref with a JMP data table and enables you to read and write JMP data tables.
-LIBNAME Statement, JSON Engine                    - Provides read-only sequential access to JSON data.
-LIBNAME Statement, WebDAV Server                  - Access	Associates a libref with a SAS library and enables access to a WebDAV (Web-based Distributed Authoring And Versioning) server.
+LIBNAME libref <engine> 'SAS-library' < libname-options > <engine-host-options>;
+LIBNAME libref CLEAR | _ALL_ CLEAR ;
+LIBNAME libref LIST | _ALL_ LIST;
+LIBNAME libref <engine> (library-specification-1 <...library-specification-n>) <libname-options>;
+libref: 1 to 8 bytes
+'SAS-library': must be the physical name for the SAS library. The physical name is the name that is recognized by the operating environment. Enclose the physical name in single or double quotation marks.
+library-specification: 'SAS-library', libref
+CLEAR: disassociates one or more currently assigned librefs.
+_ALL_: specifies that the CLEAR or LIST argument applies to all currently assigned librefs.
+LIST: writes the attributes of one or more SAS libraries to the SAS log.
+libname-options: ACCESS=READONLY|TEMP 
+
+eg:
+libname sales 'SAS-library';
+libname allmine (v9 v6 'some-filename');
+
 Information: Gives SAS additional information about the program data vector.
-MISSING Statement	                                - Assigns characters in your input data to represent special missing values for numeric data.
-Log Control:                                      - Alters the appearance of the SAS log.
-Comment Statement	                                - Specifies the purpose of the statement or program.
-PAGE Statement                                    - Skips to a new page in the SAS log.
-RESETLINE Statement	                              - Restarts the program line numbers in the SAS log to 1.
-SKIP Statement	                                  - Creates a blank line in the SAS log.
+MISSING character(s);                             - Assigns characters in your input data to represent special missing values for numeric data.
+character: is the value in your input data that represents a special missing value.
+The MISSING statement usually appears within a DATA step, but it is global in scope.
+
+eg:
+data survey;
+   missing a r;
+   input id answer;
+   datalines;
+001 2
+002 R
+003 1
+004 A
+005 2
+;
+
+Log Control: Alters the appearance of the SAS log.
+*message;/*message*/	                            - Comment. Specifies the purpose of the statement or program.
+PAGE                                              - Skips to a new page in the SAS log.
+RESETLINE         	                              - Restarts the program line numbers in the SAS log to 1.
+SKIP <n>;     	                                  - Creates a/<n> blank line(s) in the SAS log.
+
 Operating Environment: Accesses the operating environment directly.	
-X Statement	                                      - Issues an operating-environment command from within a SAS session.
+X <'operating-environment-command'>;              - Issues an operating-environment command from within a SAS session.
+
 Output Control: Adds titles and footnotes to your SAS output; delivers output in a variety of formats.
-FOOTNOTE Statement	                              - Writes up to 10 lines of text at the bottom of the procedure or DATA step output.
-TITLE Statement	                                  - Specifies title lines for SAS output.
+FOOTNOTE <n> <ods-format-options> <'text'|“text”>;- Writes up to 10 lines of text at the bottom of the procedure or DATA step output.
+TITLE <n> <ods-format-options> <'text'|“text”>;   - Specifies title lines for SAS output.
+ods-format-options:
+BOLD: specifies that the title text is bold font weight.
+COLOR | C =color: specifies the title text color.
+BCOLOR=color: specifies the background color of the title block.
+FONT | F =font-face: specifies the font to use. If you supply multiple fonts, then the destination device uses the first one that is installed on your system.
+HEIGHT | H =dimension | size : specifies the size of the font for titles
+ITALIC: specifies that the title text is in italics.
+JUSTIFY | J= CENTER | C | LEFT | L | RIGHT | R
+UNDERLIN | U = 0 | 1 | 2 | 3: specifies whether the subsequent text is underlined. Value 0 indicates no underlining. Values 1, 2, and 3 indicate underlining.
+
 Program Control: Governs how SAS processes your SAS program.
-CHECKPOINT EXECUTE_ALWAYS Statement	              - Indicates to execute the DATA step or PROC step that immediately follows without considering the checkpoint-restart data.
-DM Statement	                                    - Submits SAS Program Editor, Log, Procedure Output or text editor commands as SAS statements.
-ENDSAS Statement	                                - Terminates a SAS job or session after the current DATA or PROC step executes.
-%INCLUDE Statement	                              - Brings a SAS programming statement, data lines, or both, into a current SAS program.
-%LIST Statement	                                  - Displays lines that are entered in the current session.
-LOCK Statement	                                  - Acquires, lists, or releases an exclusive lock on an existing SAS file.
-OPTIONS Statement	                                - Specifies or changes the value of one or more SAS system options.
-RUN Statement	                                    - Executes the previously entered SAS statements.
-%RUN Statement	                                  - Ends source statements following a %INCLUDE * statement.
-SASFILE Statement	                                - Opens a SAS data set and allocates enough buffers to hold the entire file in memory.
-SYSECHO Statement	                                - Sends a global statement complete event and passes a text string back to the IOM client.
+CHECKPOINT EXECUTE_ALWAYS                         - Indicates to execute the DATA step or PROC step that immediately follows without considering the checkpoint-restart data.
+DM <window> 'command(s)' <window> <CONTINUE> ;    - Submits SAS Program Editor, Log, Procedure Output or text editor commands as SAS statements.
+ENDSAS          	                                - Terminates a SAS job or session after the current DATA or PROC step executes.
+%INCLUDE |	%INC source(s) </<SOURCE2> <S2=length> <operating-environment-options> >;
+                                                  - Brings a SAS programming statement, data lines, or both, into a current SAS program.
+%include 'MYFILE';
+filename in1 'MYFILE'; %inc in1;
+filename storage 'aggregate-storage-location'; %inc storage(file-1,file-2,file-3);%inc storage("file-1.txt","file-2.dat","file-3.cat");
+%include 1 5 9-12 13:16; /*This %INCLUDE statement causes SAS to process lines 1, 5, 9 through 12, and 13 through 16 as if you had entered them again from your keyboard.*/
+
+%LIST <n <:m | − m> >;                            - Displays lines that are entered in the current session.
+%RUN          	                                  - Ends source statements following a %INCLUDE * statement.
+LOCK libref<.member-name<.member-type | .entry-name.entry-type>> <LIST | QUERY | SHOW | CLEAR | NOMSG>;	
+                                                  - Acquires, lists, or releases an exclusive lock on an existing SAS file.
+RUN <CANCEL>;	                                    - Executes the previously entered SAS statements.
+CANCEL: terminates the current step without executing it. SAS prints a message that indicates that the step was not executed.
+
+SASFILE <libref.> member-name<.member-type> <(password-option(s))> OPEN | LOAD | CLOSE;
+                                                  - Opens a SAS data set and allocates enough buffers to hold the entire file in memory.
+
+OPTIONS option(s);                                - Specifies or changes the value of one or more SAS system options.
+See SAS Options;
