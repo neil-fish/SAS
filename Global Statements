@@ -1,0 +1,49 @@
+Global Statement
+
+A SAS global statement is a string of SAS keywords, SAS names, special characters, and operators that instructs SAS to perform an operation or that gives information to SAS. 
+Each SAS global statement ends with a semicolon and can be used anywhere in a SAS program.
+Global statements are not executable; they take effect as soon as SAS compiles program statements.
+
+Data Access: Associates reference names with SAS libraries, SAS catalogs, external files and output devices, and accesses remote files.	
+FILENAME Statement	                              - Associates a SAS fileref with an external file or an output device, disassociates a fileref and external file, or lists attributes of external files.
+FILENAME Statement, CATALOG                       - Access Method	Enables you to reference a SAS catalog as an external file.
+FILENAME Statement, CLIPBOARD                     - Access Method	Enables you to read text data from and write text data to the clipboard on the host computer.
+FILENAME Statement, DATAURL                       - Access Method	Enables you to read data from user-specified text.
+FILENAME Statement, EMAIL (SMTP)                  - Access Method	Enables you to send electronic mail programmatically from SAS using the SMTP (Simple Mail Transfer Protocol) email interface.
+FILENAME Statement, FILESRVC Access Method	      - Enables you to store and retrieve user content using the SAS Viya Files service.
+FILENAME Statement, FTP Access Method	            - Enables you to access remote files by using the FTP protocol.
+FILENAME Statement, Hadoop Access Method	        - Enables you to access files on a Hadoop Distributed File System (HDFS) whose location is specified in a configuration file.
+FILENAME Statement, SFTP Access Method	          - Enables you to access remote files by using the SFTP protocol.
+FILENAME Statement, SOCKET Access Method	        - Enables you to read from or write to a TCP/IP socket.
+FILENAME Statement, URL Access Method	            - Enables you to access remote files by using the URL access method.
+FILENAME Statement, WebDAV Access Method	        - Enables you to access remote files by using the WebDAV protocol.
+FILENAME Statement, ZIP Access Method	            - Enables you to access ZIP files.
+LIBNAME Statement	                                - Associates or disassociates a SAS library with a libref (a shortcut name), clears one or all librefs, lists the characteristics of a SAS library, concatenates SAS libraries, or concatenates SAS catalogs.
+LIBNAME Statement, CVP Engine	                    - Associates a libref for the character variable padding (CVP) engine to expand character variable lengths so that character data truncation does not occur when a file requires transcoding.
+LIBNAME Statement, JMP Engine	                    - Associates a libref with a JMP data table and enables you to read and write JMP data tables.
+LIBNAME Statement, JSON Engine                    - Provides read-only sequential access to JSON data.
+LIBNAME Statement, WebDAV Server                  - Access	Associates a libref with a SAS library and enables access to a WebDAV (Web-based Distributed Authoring And Versioning) server.
+Information: Gives SAS additional information about the program data vector.
+MISSING Statement	                                - Assigns characters in your input data to represent special missing values for numeric data.
+Log Control:                                      - Alters the appearance of the SAS log.
+Comment Statement	                                - Specifies the purpose of the statement or program.
+PAGE Statement                                    - Skips to a new page in the SAS log.
+RESETLINE Statement	                              - Restarts the program line numbers in the SAS log to 1.
+SKIP Statement	                                  - Creates a blank line in the SAS log.
+Operating Environment: Accesses the operating environment directly.	
+X Statement	                                      - Issues an operating-environment command from within a SAS session.
+Output Control: Adds titles and footnotes to your SAS output; delivers output in a variety of formats.
+FOOTNOTE Statement	                              - Writes up to 10 lines of text at the bottom of the procedure or DATA step output.
+TITLE Statement	                                  - Specifies title lines for SAS output.
+Program Control: Governs how SAS processes your SAS program.
+CHECKPOINT EXECUTE_ALWAYS Statement	              - Indicates to execute the DATA step or PROC step that immediately follows without considering the checkpoint-restart data.
+DM Statement	                                    - Submits SAS Program Editor, Log, Procedure Output or text editor commands as SAS statements.
+ENDSAS Statement	                                - Terminates a SAS job or session after the current DATA or PROC step executes.
+%INCLUDE Statement	                              - Brings a SAS programming statement, data lines, or both, into a current SAS program.
+%LIST Statement	                                  - Displays lines that are entered in the current session.
+LOCK Statement	                                  - Acquires, lists, or releases an exclusive lock on an existing SAS file.
+OPTIONS Statement	                                - Specifies or changes the value of one or more SAS system options.
+RUN Statement	                                    - Executes the previously entered SAS statements.
+%RUN Statement	                                  - Ends source statements following a %INCLUDE * statement.
+SASFILE Statement	                                - Opens a SAS data set and allocates enough buffers to hold the entire file in memory.
+SYSECHO Statement	                                - Sends a global statement complete event and passes a text string back to the IOM client.
