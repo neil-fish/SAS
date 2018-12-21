@@ -641,40 +641,6 @@ WHERE where-expression-1 < logical-operator where-expression-n>;
                                                         Using the WHERE statement might improve the efficiency of your SAS programs because SAS is not required to read all observations from the input data set.                                  -
 */
 
-/*Operator
-Operator Type       Symbol or Mnemonic        Description
-Arithmetic
-                    *                         multiplication
-                    /                         division
-                    +                         addition
-                    −                         subtraction
-                    **                        exponentiation
-Comparison
-                    = or EQ                   equal to
-                    ^=, ¬=, ~=, or NE1        not equal to
-                    > or GT                   greater than
-                    < or LT                   less than
-                    >= or GE                  greater than or equal to
-                    <= or LE                  less than or equal to
-                    IN                        equal to one of a list
-Logical (Boolean)         
-                    & or AND                  logical and
-                    | or OR                   logical or
-                    ~,^ , ¬, or NOT           logical not
-Other                      
-                    ||                        concatenation of character variables
-                    ( )                       indicate order of evaluation
-                    + prefix                  positive number
-                    − prefix                  negative number
-WHERE Expression Only
-                    BETWEEN–AND               an inclusive range
-                    ? or CONTAINS             a character string
-                    IS NULL or IS MISSING     missing values
-                    LIKE                      match patterns
-                    =*                        sounds-like
-                    SAME-AND                  add clauses to an existing WHERE statement without retyping original one
-*/
-
 /*Utility
 %DS2CSV(argument-1=value-1, argument-2=value-2 <,argument-3=value-3 ...>)
                                                       - Converts SAS data sets to comma-separated value (CSV) files.
